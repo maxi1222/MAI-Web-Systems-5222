@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Oct 14, 2026 at 02:17 PM
+-- Generation Time: Oct 17, 2026 at 01:49 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: ` MAI_Panaderia`
+-- Database: `MAI_Panaderia`
 --
 
 -- --------------------------------------------------------
