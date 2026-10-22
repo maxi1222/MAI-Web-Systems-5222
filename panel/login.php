@@ -1,11 +1,9 @@
 <?php
 // panel/login.php
-// Inicio de sesión del personal verificando correo y contraseña contra la tabla usuarios
 
 session_start();
 require_once '../config/conexion.php';
 
-// Si ya existe una sesión activa, redirigir al panel
 if (isset($_SESSION["id_usuario"]) && isset($_SESSION["rol"])) {
     header("Location: agenda.php");
     exit();
@@ -13,20 +11,16 @@ if (isset($_SESSION["id_usuario"]) && isset($_SESSION["rol"])) {
 
 $mensaje_error = "";
 
-// Procesar el formulario cuando se envía por POST
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $campo_email = isset($_POST["email"]) ? $_POST["email"] : "";
     $email = trim($campo_email);
     $password = isset($_POST["password"]) ? $_POST["password"] : "";
-
-    // Validar que los campos no estén vacíos
     if (empty($email) || empty($password)) {
         $mensaje_error = "Por favor, complete el correo electrónico y la contraseña.";
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $mensaje_error = "El formato del correo electrónico no es válido.";
     } else {
         try {
-            // Consulta preparada para buscar el usuario por correo electrónico
             $sql = "SELECT id_usuario, nombre, email, password, rol FROM usuarios WHERE email = ?";
             $stmt = $conexion->prepare($sql);
             $stmt->bind_param("s", $email);
@@ -36,9 +30,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $user = $resultado->fetch_assoc();
             $stmt->close();
 
-            // Verificar si el usuario existe y la contraseña coincide con el hash Bcrypt
             if ($user && password_verify($password, $user["password"])) {
-                // Comprobar si el hash necesita actualizarse al estándar actual
                 if (password_needs_rehash($user["password"], PASSWORD_DEFAULT)) {
                     $nuevo_hash = password_hash($password, PASSWORD_DEFAULT);
                     $sql_rehash = "UPDATE usuarios SET password = ? WHERE id_usuario = ?";
@@ -48,10 +40,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     $stmt_rehash->close();
                 }
 
-                // Regenerar ID de sesión por seguridad
                 session_regenerate_id(true);
 
-                // Guardar datos del usuario y su rol (Administrador o Empleado) en $_SESSION
                 $_SESSION["id_usuario"] = $user["id_usuario"];
                 $_SESSION["nombre"] = $user["nombre"];
                 $_SESSION["usuario"] = $user["nombre"];
@@ -61,7 +51,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 header("Location: agenda.php");
                 exit();
             } else {
-                // Mensaje genérico por seguridad
                 $mensaje_error = "Correo o contraseña incorrectos.";
             }
         } catch (mysqli_sql_exception $e) {
