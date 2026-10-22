@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 420" width="600" height="420">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F6E6D4"/>
+      <stop offset="100%" stop-color="#E5C5A3"/>
+    </linearGradient>
+    <linearGradient id="crust" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#D47427"/>
+      <stop offset="100%" stop-color="#9A4812"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="420" fill="url(#bg)"/>
+  <circle cx="300" cy="210" r="145" fill="#FDF8F2" opacity="0.65"/>
+  <path d="M180 250 C180 165, 420 165, 420 250 Z" fill="url(#crust)"/>
+  <path d="M250 185 Q265 215 255 235" stroke="#FDF8F2" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <path d="M300 178 Q315 210 305 235" stroke="#FDF8F2" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <path d="M350 185 Q365 215 355 235" stroke="#FDF8F2" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <rect x="160" y="248" width="280" height="14" rx="7" fill="#5C341A"/>
+  <text x="300" y="315" text-anchor="middle" font-family="Georgia, serif" font-size="22" font-weight="bold" fill="#4A2A14">Panadería Artesanal</text>
+  <text x="300" y="342" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#7D5236">MAI Web Systems</text>
+</svg>

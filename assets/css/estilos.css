@@ -1,0 +1,835 @@
+/* assets/css/estilos.css */
+/* Hoja de estilos principal - Panadería La Ideal (MAI Web Systems) */
+/* Diseño sencillo, claro y adaptable (Responsive con CSS Grid y Flexbox) */
+
+:root {
+    --color-fondo: #FAF6F0;
+    --color-fondo-secundario: #F3ECE1;
+    --color-blanco: #FFFFFF;
+    --color-oscuro: #2C1A11;
+    --color-oscuro-medio: #4A2E1F;
+    --color-texto: #2A1E17;
+    --color-texto-suave: #6E5A4F;
+    --color-naranja: #D35400;
+    --color-naranja-hover: #B34600;
+    --color-naranja-claro: #FCEEE4;
+    --color-borde: #E6DDD0;
+    --color-rojo: #C62828;
+    --color-rojo-fondo: #FEE2E2;
+    --color-verde: #1B7A43;
+    --color-verde-fondo: #D1FAE5;
+
+    /* Colores para los estados de pedido */
+    --estado-pendiente-bg: #FEF3C7;
+    --estado-pendiente-txt: #B45309;
+    --estado-preparacion-bg: #DBEAFE;
+    --estado-preparacion-txt: #1D4ED8;
+    --estado-listo-bg: #D1FAE5;
+    --estado-listo-txt: #047857;
+    --estado-entregado-bg: #E5E7EB;
+    --estado-entregado-txt: #374151;
+}
+
+/* ==========================================================================
+   1. ESTILOS BASE Y CONTENEDOR GENERAL
+   ========================================================================== */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--color-fondo);
+    color: var(--color-texto);
+    line-height: 1.5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+img {
+    max-width: 100%;
+    display: block;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.contenedor {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* ==========================================================================
+   2. BOTONES Y ALERTAS GENERALES
+   ========================================================================== */
+.btn {
+    display: inline-block;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: background-color 0.2s;
+}
+
+.btn-primario {
+    background-color: var(--color-naranja);
+    color: var(--color-blanco);
+}
+
+.btn-primario:hover {
+    background-color: var(--color-naranja-hover);
+}
+
+.btn-secundario {
+    background-color: var(--color-blanco);
+    color: var(--color-texto);
+    border-color: var(--color-borde);
+}
+
+.btn-secundario:hover {
+    background-color: var(--color-fondo-secundario);
+}
+
+.btn-agotado,
+button:disabled {
+    background-color: #D1D5DB;
+    color: #6B7280;
+    cursor: not-allowed;
+    width: 100%;
+}
+
+.btn-bloque {
+    width: 100%;
+}
+
+.alerta {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.alerta-error {
+    background-color: var(--color-rojo-fondo);
+    color: var(--color-rojo);
+    border: 1px solid #FCA5A5;
+}
+
+.alerta-exito {
+    background-color: var(--color-verde-fondo);
+    color: var(--color-verde);
+    border: 1px solid #6EE7B7;
+}
+
+/* ==========================================================================
+   3. ENCABEZADO PÚBLICO (includes/header_publico.php)
+   ========================================================================== */
+.navbar-publico {
+    background-color: var(--color-blanco);
+    border-bottom: 1px solid var(--color-borde);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.navbar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 70px;
+    gap: 15px;
+}
+
+.brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.brand-icon {
+    width: 40px;
+    height: 40px;
+    background-color: var(--color-naranja);
+    color: var(--color-blanco);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+}
+
+.brand-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.brand-title {
+    font-family: Georgia, serif;
+    font-size: 1.15rem;
+    font-weight: bold;
+    color: var(--color-oscuro);
+}
+
+.brand-subtitle {
+    font-size: 0.75rem;
+    color: var(--color-texto-suave);
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nav-link {
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-weight: 500;
+    color: var(--color-texto);
+}
+
+.nav-link:hover,
+.nav-link.activo {
+    background-color: var(--color-naranja-claro);
+    color: var(--color-naranja);
+}
+
+.nav-link-panel {
+    background-color: var(--color-fondo-secundario);
+    font-weight: 600;
+}
+
+.btn-carrito-header {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: var(--color-oscuro);
+    color: var(--color-blanco);
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.btn-carrito-header:hover {
+    background-color: var(--color-oscuro-medio);
+}
+
+.carrito-badge {
+    background-color: var(--color-naranja);
+    color: var(--color-blanco);
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+}
+
+.btn-menu-movil {
+    display: none;
+    background: none;
+    border: 1px solid var(--color-borde);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 1.3rem;
+    cursor: pointer;
+}
+
+/* ==========================================================================
+   4. ENCABEZADO DEL PANEL INTERNO (includes/header_panel.php)
+   ========================================================================== */
+.navbar-panel {
+    background-color: var(--color-oscuro);
+    color: var(--color-blanco);
+    border-bottom: 1px solid var(--color-oscuro-medio);
+}
+
+.navbar-panel-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 70px;
+    gap: 15px;
+}
+
+.brand-logo-panel .brand-title {
+    color: var(--color-blanco);
+}
+
+.brand-logo-panel .brand-subtitle {
+    color: #D7CCC8;
+}
+
+.nav-panel-links {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.nav-panel-link {
+    padding: 8px 12px;
+    border-radius: 6px;
+    color: #EFEBE9;
+    font-size: 0.9rem;
+}
+
+.nav-panel-link:hover,
+.nav-panel-link.activo {
+    background-color: var(--color-naranja);
+    color: var(--color-blanco);
+}
+
+.panel-user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: var(--color-oscuro-medio);
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+}
+
+.user-role-badge {
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    background-color: var(--color-naranja);
+    color: var(--color-blanco);
+}
+
+.btn-logout-panel {
+    background-color: var(--color-rojo);
+    color: var(--color-blanco);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.btn-menu-panel {
+    color: var(--color-blanco);
+    border-color: var(--color-oscuro-medio);
+}
+
+/* ==========================================================================
+   5. PIE DE PÁGINA (includes/footer.php)
+   ========================================================================== */
+.footer-sitio {
+    background-color: var(--color-oscuro);
+    color: #EFEBE9;
+    margin-top: 50px;
+    padding-top: 40px;
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    padding-bottom: 30px;
+}
+
+.footer-titulo-marca {
+    font-family: Georgia, serif;
+    font-size: 1.2rem;
+    color: var(--color-blanco);
+    margin-bottom: 10px;
+}
+
+.footer-col h4 {
+    color: var(--color-blanco);
+    margin-bottom: 12px;
+    font-size: 1rem;
+}
+
+.footer-desc {
+    color: #D7CCC8;
+    font-size: 0.9rem;
+}
+
+.footer-links,
+.footer-info {
+    list-style: none;
+}
+
+.footer-links li,
+.footer-info li {
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    color: #D7CCC8;
+}
+
+.footer-links a:hover {
+    color: var(--color-naranja);
+    text-decoration: underline;
+}
+
+.footer-bottom {
+    border-top: 1px solid var(--color-oscuro-medio);
+    padding: 18px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    color: #BCAAA4;
+}
+
+.footer-staff-link {
+    color: var(--color-naranja);
+    font-weight: 600;
+}
+
+/* ==========================================================================
+   6. VISTA DE LOGIN (panel/login.php)
+   ========================================================================== */
+.login-contenedor {
+    min-height: 85vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.login-tarjeta {
+    background-color: var(--color-blanco);
+    border: 1px solid var(--color-borde);
+    border-radius: 12px;
+    padding: 32px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 6px 20px rgba(44, 26, 17, 0.08);
+}
+
+.login-tarjeta h1 {
+    font-family: Georgia, serif;
+    color: var(--color-oscuro);
+    font-size: 1.6rem;
+    margin-bottom: 6px;
+    text-align: center;
+}
+
+.login-tarjeta p {
+    color: var(--color-texto-suave);
+    font-size: 0.9rem;
+    text-align: center;
+    margin-bottom: 22px;
+}
+
+.formulario-login .grupo-formulario {
+    margin-bottom: 16px;
+}
+
+.grupo-formulario label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+    font-size: 0.9rem;
+}
+
+.grupo-formulario input,
+.grupo-formulario select,
+.grupo-formulario textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--color-borde);
+    border-radius: 8px;
+    font-size: 0.95rem;
+}
+
+.formulario-login .btn-primario {
+    width: 100%;
+    margin-top: 8px;
+    padding: 12px;
+}
+
+.enlace-volver {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.enlace-volver a {
+    color: var(--color-naranja);
+    font-weight: 600;
+}
+
+/* ==========================================================================
+   7. CATÁLOGO DE PRODUCTOS Y FILTROS (H.U-01 y H.U-08)
+   ========================================================================== */
+.banner-catalogo {
+    background-color: var(--color-fondo-secundario);
+    border-bottom: 1px solid var(--color-borde);
+    padding: 36px 0;
+    margin-bottom: 28px;
+}
+
+.subtitulo-seccion {
+    display: inline-block;
+    color: var(--color-naranja);
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+
+.titulo-seccion {
+    font-family: Georgia, serif;
+    font-size: 2rem;
+    color: var(--color-oscuro);
+    margin-bottom: 8px;
+}
+
+.descripcion-seccion {
+    color: var(--color-texto-suave);
+    max-width: 700px;
+}
+
+/* HU01-T03: Barra de filtros */
+.barra-filtros {
+    background-color: var(--color-blanco);
+    border: 1px solid var(--color-borde);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 28px;
+    display: grid;
+    grid-template-columns: 2fr 1.5fr 1.5fr auto;
+    gap: 16px;
+    align-items: end;
+}
+
+.filtro-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.filtro-item label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-texto);
+}
+
+.filtro-item input,
+.filtro-item select {
+    padding: 10px 12px;
+    border: 1px solid var(--color-borde);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    background-color: var(--color-blanco);
+}
+
+.filtro-botones {
+    display: flex;
+    gap: 8px;
+}
+
+/* HU01-T01: Grilla responsiva de tarjetas con CSS Grid (sin usar tablas) */
+.catalogo-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+.tarjeta-producto {
+    background-color: var(--color-blanco);
+    border: 1px solid var(--color-borde);
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 12px rgba(44, 26, 17, 0.05);
+}
+
+.tarjeta-producto.producto-agotado {
+    opacity: 0.82;
+}
+
+.tarjeta-imagen-caja {
+    position: relative;
+    height: 200px;
+    background-color: var(--color-fondo-secundario);
+    overflow: hidden;
+}
+
+.tarjeta-imagen {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.tarjeta-etiquetas {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: flex;
+    gap: 6px;
+}
+
+.etiqueta {
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+
+.etiqueta-destacado {
+    background-color: var(--color-oscuro);
+    color: var(--color-blanco);
+}
+
+/* HU08-T03: Etiqueta roja "Agotado" */
+.etiqueta-agotado {
+    background-color: var(--color-rojo);
+    color: var(--color-blanco);
+}
+
+/* Botón de corazón para Likes (Firebase) */
+.btn-like {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: var(--color-blanco);
+    border: 1px solid var(--color-borde);
+    border-radius: 999px;
+    padding: 4px 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.btn-like.like-activo {
+    background-color: var(--color-rojo-fondo);
+    color: var(--color-rojo);
+    border-color: var(--color-rojo);
+}
+
+.tarjeta-cuerpo {
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.tarjeta-fila-superior {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.tarjeta-categoria {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-naranja);
+    background-color: var(--color-naranja-claro);
+    padding: 2px 8px;
+    border-radius: 6px;
+}
+
+.tarjeta-precio {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--color-oscuro);
+}
+
+.tarjeta-titulo {
+    font-family: Georgia, serif;
+    font-size: 1.15rem;
+    color: var(--color-oscuro);
+    margin-bottom: 8px;
+}
+
+.tarjeta-descripcion {
+    font-size: 0.9rem;
+    color: var(--color-texto-suave);
+    margin-bottom: 12px;
+    flex: 1;
+}
+
+.tarjeta-dias {
+    font-size: 0.8rem;
+    color: var(--color-texto-suave);
+    background-color: var(--color-fondo);
+    padding: 6px 10px;
+    border-radius: 6px;
+    margin-bottom: 14px;
+}
+
+.tarjeta-acciones {
+    margin-top: auto;
+}
+
+.mensaje-vacio {
+    background-color: var(--color-blanco);
+    border: 1px solid var(--color-borde);
+    border-radius: 12px;
+    padding: 40px 20px;
+    text-align: center;
+}
+
+.mensaje-vacio h3 {
+    margin-bottom: 8px;
+    color: var(--color-oscuro);
+}
+
+.mensaje-vacio p {
+    color: var(--color-texto-suave);
+    margin-bottom: 16px;
+}
+
+/* ==========================================================================
+   8. MODAL DE AVISO TELEFÓNICO (H.U-03)
+   ========================================================================== */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(44, 26, 17, 0.6);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal-overlay.activo {
+    display: flex;
+}
+
+.modal-card {
+    background-color: var(--color-blanco);
+    border-radius: 12px;
+    max-width: 460px;
+    width: 100%;
+    padding: 28px;
+    position: relative;
+    text-align: center;
+}
+
+.modal-close-btn {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 1.6rem;
+    cursor: pointer;
+    color: var(--color-texto-suave);
+}
+
+.modal-titulo {
+    font-family: Georgia, serif;
+    font-size: 1.35rem;
+    color: var(--color-oscuro);
+    margin-bottom: 12px;
+}
+
+.modal-mensaje {
+    background-color: var(--color-naranja-claro);
+    color: var(--color-oscuro);
+    padding: 14px;
+    border-radius: 8px;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
+.modal-datos {
+    font-size: 0.9rem;
+    color: var(--color-texto-suave);
+    margin-bottom: 20px;
+}
+
+/* ==========================================================================
+   9. DISEÑO RESPONSIVO (Celulares y Tablets - HU01-T05 y RNF-01)
+   ========================================================================== */
+
+/* Tablets (hasta 992px): 2 columnas de productos y filtros en 2 columnas */
+@media (max-width: 992px) {
+    .catalogo-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .barra-filtros {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .footer-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* Celulares (hasta 680px): 1 columna de productos, menú desplegable y filtros apilados */
+@media (max-width: 680px) {
+    .btn-menu-movil {
+        display: block;
+    }
+
+    .navbar-inner,
+    .navbar-panel-inner {
+        flex-wrap: wrap;
+        padding: 10px 0;
+    }
+
+    .nav-links,
+    .nav-panel-links {
+        display: none;
+        width: 100%;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 10px 0;
+        border-top: 1px solid var(--color-borde);
+    }
+
+    .nav-links.abierto,
+    .nav-panel-links.abierto {
+        display: flex;
+    }
+
+    .barra-filtros {
+        grid-template-columns: 1fr;
+    }
+
+    .filtro-botones {
+        flex-direction: column;
+    }
+
+    .filtro-botones .btn {
+        width: 100%;
+    }
+
+    .catalogo-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .footer-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .footer-bottom {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+}
