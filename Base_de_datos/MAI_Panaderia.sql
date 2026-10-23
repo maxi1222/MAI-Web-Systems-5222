@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Oct 17, 2026 at 01:49 AM
+-- Generation Time: Oct 23, 2026 at 04:44 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -26,13 +26,15 @@ SET time_zone = "+00:00";
 --
 -- Table structure for table `detalle_pedidos`
 --
+CREATE DATABASE IF NOT EXISTS MAI_Panaderia;
+USE MAI_Panaderia;
 
 CREATE TABLE `detalle_pedidos` (
   `id_detalle` int(11) NOT NULL,
   `id_pedido` int(11) NOT NULL,
   `id_producto` int(11) NOT NULL,
   `cantidad` int(11) NOT NULL,
-  `precio_unitario` decimal(10,2) NOT NULL
+  `precio_unitario` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -82,6 +84,16 @@ CREATE TABLE `usuarios` (
   `password` varchar(255) NOT NULL,
   `rol` enum('Administrador','Empleado') NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `usuarios`
+--
+
+INSERT INTO `usuarios` (`id_usuario`, `nombre`, `email`, `password`, `rol`) VALUES
+(1, 'Iñaki Barreda', 'iniaki.barreda@gmail.com', '$2y$10$uAG8IRfswNwOzDNUKDZ6sOxqFJIQKCMvntWB85EYTBf8oyGMqJqg.', 'Empleado'),
+(2, 'Alejandro García', 'garciafeijoalejandro@gmail.com', '$2y$10$b1iSAEpnkM.0zomdjiHeIeiIz6XGGtxr8XaG1CUF7OX86waer17Fq', 'Empleado'),
+(3, 'Maximiliano Castellanos', 'castellanosmaxi030@gmail.com', '$2y$10$u1oJlW3og5gvu8EdHxqplOuyxQbcJO1giOpxH6A2BdV.pILTLHMVa', 'Empleado'),
+(4, 'Admin', 'admin321@gmail.com', '$2y$10$zWICVbWeNTjKxayId/4B.eViEl3Enfa7btaOQdQN6h3NFPlSs9vvS', 'Administrador');
 
 --
 -- Indexes for dumped tables
@@ -140,7 +152,7 @@ ALTER TABLE `productos`
 -- AUTO_INCREMENT for table `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- Constraints for dumped tables
@@ -153,6 +165,12 @@ ALTER TABLE `detalle_pedidos`
   ADD CONSTRAINT `detalle_pedidos_ibfk_1` FOREIGN KEY (`id_pedido`) REFERENCES `pedidos` (`id_pedido`) ON DELETE CASCADE,
   ADD CONSTRAINT `detalle_pedidos_ibfk_2` FOREIGN KEY (`id_producto`) REFERENCES `productos` (`id_producto`);
 COMMIT;
+
+INSERT INTO usuarios (nombre, email, password, rol) VALUES
+    ('Iñaki Barreda', 'iniaki.barreda@gmail.com', '$2y$10$uAG8IRfswNwOzDNUKDZ6sOxqFJIQKCMvntWB85EYTBf8oyGMqJqg.', 'Empleado'),
+    ('Alejandro García', 'garciafeijoalejandro@gmail.com', '$2y$10$b1iSAEpnkM.0zomdjiHeIeiIz6XGGtxr8XaG1CUF7OX86waer17Fq', 'Empleado'),
+    ('Maximiliano Castellanos', 'castellanosmaxi030@gmail.com', '$2y$10$u1oJlW3og5gvu8EdHxqplOuyxQbcJO1giOpxH6A2BdV.pILTLHMVa', 'Empleado'),
+    ('Admin', 'admin321@gmail.com', '$2y$10$zWICVbWeNTjKxayId/4B.eViEl3Enfa7btaOQdQN6h3NFPlSs9vvS', 'Administrador');
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
