@@ -4,10 +4,15 @@ require_once __DIR__ . '/../config/db.php';
 
 define('CUPO_DIARIO_MAXIMO', 10); 
 
-$fecha_retiro_dia   = isset($_POST['fecha_retiro_dia']) ? $_POST['fecha_retiro_dia'] : '';
-$fecha_retiro_hora  = isset($_POST['fecha_retiro_hora']) ? $_POST['fecha_retiro_hora'] : '';
+$nombre_cliente = isset($_POST['nombre_cliente']) ? trim($_POST['nombre_cliente']) : '';
+$telefono_raw = isset($_POST['telefono_cliente']) ? trim($_POST['telefono_cliente']) : '';
+$fecha_retiro_dia = isset($_POST['fecha_retiro_dia']) ? $_POST['fecha_retiro_dia'] : '';
+$fecha_retiro_hora = isset($_POST['fecha_retiro_hora']) ? $_POST['fecha_retiro_hora'] : '';
 
 $errores = [];
+
+
+$fecha_hora_mysql = '';
 if (empty($fecha_retiro_dia) || empty($fecha_retiro_hora)) {
     $errores[] = "Debe seleccionar obligatoriamente la fecha y la hora de retiro.";
 } else {
@@ -15,28 +20,34 @@ if (empty($fecha_retiro_dia) || empty($fecha_retiro_hora)) {
     $ts_retiro = strtotime($fecha_hora_candidata);
     $ts_minimo = time() + (24 * 60 * 60);
 
-    if ($ts_retiro < $ts_minimo) {
-        $errores[] = "Los pedidos deben realizarse con al menos 1 día de anticipación";
-    }
+    if ($ts_retiro === false) {
+        $errores[] = "El formato de la fecha u hora no es válido.";
+    } else {
+        $fecha_hora_mysql = date('Y-m-d H:i:s', $ts_retiro);
 
-    $sql_cupo = "SELECT COUNT(*) AS total FROM pedidos WHERE DATE(fecha_retiro) = ?";
-    $stmt_cupo = mysqli_prepare($conexion, $sql_cupo);
+        if ($ts_retiro < $ts_minimo) {
+            $errores[] = "Los pedidos deben realizarse con al menos 1 día de anticipación";
+        }
 
-    if ($stmt_cupo) {
-        mysqli_stmt_bind_param($stmt_cupo, "s", $fecha_retiro_dia);
-        mysqli_stmt_execute($stmt_cupo);
-        $resultado = mysqli_stmt_get_result($stmt_cupo);
-        $fila = mysqli_fetch_assoc($resultado);
-        
-        $pedidos_actuales = (int)$fila['total'];
-        mysqli_stmt_close($stmt_cupo);
 
-        // (si los pedidos ya alcanzaron o superaron el límite, se rechaza)
-        if ($pedidos_actuales >= CUPO_DIARIO_MAXIMO) {
-            $errores[] = "El cupo diario de producción para la fecha seleccionada ya se encuentra completo.";
+        $sql_cupo = "SELECT COUNT(*) AS total FROM pedidos WHERE DATE(fecha_retiro) = ?";
+        $stmt_cupo = mysqli_prepare($conexion, $sql_cupo);
+
+        if ($stmt_cupo) {
+            mysqli_stmt_bind_param($stmt_cupo, "s", $fecha_retiro_dia);
+            mysqli_stmt_execute($stmt_cupo);
+            $resultado = mysqli_stmt_get_result($stmt_cupo);
+            $fila = mysqli_fetch_assoc($resultado);
+            
+            $pedidos_actuales = (int)$fila['total'];
+            mysqli_stmt_close($stmt_cupo);
+            if ($pedidos_actuales >= CUPO_DIARIO_MAXIMO) {
+                $errores[] = "El cupo diario de producción para la fecha seleccionada ya se encuentra completo.";
+            }
         }
     }
 }
+
 
 $dia_semana_retiro = !empty($fecha_retiro_dia) ? date('l', strtotime($fecha_retiro_dia)) : '';
 
@@ -61,12 +72,29 @@ if (!empty($_SESSION['carrito'])) {
     }
 }
 
+
 if (!empty($errores)) {
     $_SESSION['errores_pedido'] = $errores;
     foreach ($errores as $err) {
         echo "<p style='color:red;'>$err</p>";
     }
 } else {
-    echo "<p style='color:green;'>¡Validación correcta para HU02-T03 y HU02-T04!</p>";
+    $estado_inicial = 'Pendiente';
+    
+    $sql_insert_pedido = "INSERT INTO pedidos (nombre_cliente, telefono_cliente, fecha_retiro, estado) VALUES (?, ?, ?, ?)";
+    $stmt_pedido = mysqli_prepare($conexion, $sql_insert_pedido);
+
+    if ($stmt_pedido) {
+        mysqli_stmt_bind_param($stmt_pedido, "ssss", $nombre_cliente, $telefono_raw, $fecha_hora_mysql, $estado_inicial);
+        
+        if (mysqli_stmt_execute($stmt_pedido)) {
+            $id_nuevo_pedido = (int)mysqli_insert_id($conexion);
+            echo "<p style='color:green;'>¡Pedido guardado con éxito! ID generado: $id_nuevo_pedido</p>";
+        } else {
+            echo "<p style='color:red;'>Ocurrió un error al registrar el pedido en la base de datos.</p>";
+        }
+        
+        mysqli_stmt_close($stmt_pedido);
+    }
 }
 ?>
