@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/config/db.php';
+require_once __DIR__ . '/config/conexion.php';
 
 $id_pedido = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
@@ -24,14 +24,13 @@ mysqli_stmt_close($stmt);
     
     <?php if ($pedido): ?>
         <p><strong>Número de Pedido:</strong> #<?php echo $pedido['id_pedido']; ?></p>
-        <p><strong>Cliente:</strong> <?php echo $pedido['nombre_cliente']; ?></p>
+        <p><strong>Cliente:</strong> <?php echo htmlspecialchars($pedido['nombre_cliente'], ENT_QUOTES, 'UTF-8');
+    ?></p>
         <p><strong>Fecha de Retiro:</strong> <?php echo $pedido['fecha_retiro']; ?></p>
         <p><strong>Estado:</strong> <?php echo $pedido['estado']; ?></p>
 
-        <form action="acciones/pedido_cancelar.php" method="POST">
-            <input type="hidden" name="id_pedido" value="<?php echo $pedido['id_pedido']; ?>">
-            <button type="submit" style="background-color: red; color: white;">Cancelar Pedido</button>
-        </form>
+        <button type="button" id="btnModificarCancelarPedido" class="btn btn-secundario">Modificar o Cancelar
+        Pedido</button>
     <?php else: ?>
         <p>No se encontró el pedido solicitado.</p>
     <?php endif; ?>

@@ -1,9 +1,8 @@
 <?php
 
 session_start();
-require_once __DIR__ . '/../config/db.php';
-
-define('CUPO_DIARIO_MAXIMO', 10); 
+require_once __DIR__ . '/../config/conexion.php';
+require_once __DIR__ . '/../includes/funciones.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST' || empty($_SESSION['carrito'])) {
     header("Location: ../carrito.php");
@@ -26,7 +25,10 @@ $errores = [];
 
 
 $fecha_hora_mysql = '';
-if (empty($fecha_retiro_dia) || empty($fecha_retiro_hora)) {
+        if (empty($nombre_cliente) || empty($telefono_raw)) {
+            $errores[] = "Debe completar obligatoriamente su nombre y teléfono.";
+        }
+        if (empty($fecha_retiro_dia) || empty($fecha_retiro_hora)) {
     $errores[] = "Debe seleccionar obligatoriamente la fecha y la hora de retiro.";
 } else {
     $fecha_hora_candidata = $fecha_retiro_dia . ' ' . $fecha_retiro_hora . ':00';
@@ -63,7 +65,7 @@ if (empty($fecha_retiro_dia) || empty($fecha_retiro_hora)) {
 }
 
 
-$dia_semana_retiro = !empty($fecha_retiro_dia) ? date('l', strtotime($fecha_retiro_dia)) : '';
+$dia_semana_retiro = !empty($fecha_retiro_dia) ? obtener_dia_semana($fecha_retiro_dia) : '';
 $items_validados = [];
 
 foreach ($_SESSION['carrito'] as $id_producto => $cantidad) {
@@ -71,7 +73,7 @@ foreach ($_SESSION['carrito'] as $id_producto => $cantidad) {
     $cant_int = (int)$cantidad;
     if ($cant_int <= 0) continue;
 
-    $sql_prod = "SELECT id_producto, nombre, precio, dias_habilitados FROM productos WHERE id_producto = ?";
+    $sql_prod = "SELECT id_producto, nombre, precio, disponible, dias_habilitados FROM productos WHERE id_producto = ?";
     $stmt_prod = mysqli_prepare($conexion, $sql_prod);
 
     if ($stmt_prod) {
@@ -83,6 +85,11 @@ foreach ($_SESSION['carrito'] as $id_producto => $cantidad) {
 
         if (!$fila_p) {
             $errores[] = "Uno de los productos ya no existe en el catálogo.";
+            continue;
+        }
+
+        if ((int)$fila_p['disponible'] !== 1) {
+            $errores[] = "El producto \"" . $fila_p['nombre'] . "\" se encuentra agotado.";
             continue;
         }
 
