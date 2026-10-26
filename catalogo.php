@@ -3,6 +3,7 @@
 // Catálogo de productos con barra de filtros y diseño responsivo en tarjetas (H.U-01 y H.U-08)
 
 require_once 'config/conexion.php';
+require_once 'includes/funciones.php';
 
 $ruta_base = "";
 $pagina_actual = "catalogo";
@@ -22,18 +23,18 @@ $categorias_disponibles = array(
     "Salados y Sandwichería"
 );
 
-// Consultar productos de la base de datos (si ya hay productos cargados en MySQL)
-$productos = array();
+// Consultar productos de la base de datos
+$todos_los_productos = array();
 $sql = "SELECT id_producto, nombre, descripcion, precio, categoria, imagen_url, disponible, destacado, dias_habilitados FROM productos ORDER BY disponible DESC, nombre ASC";
 $resultado = $conexion->query($sql);
 
 if ($resultado && $resultado->num_rows > 0) {
     while ($fila = $resultado->fetch_assoc()) {
-        $productos[] = $fila;
+        $todos_los_productos[] = $fila;
     }
 } else {
     // Productos de muestra para visualizar las tarjetas mientras la tabla productos esté vacía
-    $productos = array(
+    $todos_los_productos = array(
         array(
             "id_producto" => 1,
             "nombre" => "Croissant de Manteca Artesanal",
@@ -101,6 +102,43 @@ if ($resultado && $resultado->num_rows > 0) {
             "dias_habilitados" => "Martes,Miercoles,Jueves,Viernes,Sabado,Domingo"
         )
     );
+}
+
+// Si el cliente seleccionó una fecha de retiro, obtener el día de la semana (quitando tildes para comparar con dias_habilitados)
+$dia_buscado = "";
+if (!empty($fecha_retiro)) {
+    $dia_con_tilde = obtener_dia_semana($fecha_retiro);
+    $dia_buscado = str_replace(array("é", "á"), array("e", "a"), $dia_con_tilde);
+}
+
+// Aplicar los filtros seleccionados (texto, categoría y fecha de retiro)
+$productos = array();
+foreach ($todos_los_productos as $item) {
+    // 1. Filtrar por buscador de texto (nombre o descripción)
+    if (!empty($buscar)) {
+        $coincide_nombre = (stripos($item["nombre"], $buscar) !== false);
+        $coincide_desc = (stripos($item["descripcion"], $buscar) !== false);
+        if (!$coincide_nombre && !$coincide_desc) {
+            continue;
+        }
+    }
+
+    // 2. Filtrar por categoría exacta
+    if (!empty($categoria)) {
+        if ($item["categoria"] !== $categoria) {
+            continue;
+        }
+    }
+
+    // 3. Filtrar por día de elaboración según la fecha de retiro elegida
+    if (!empty($dia_buscado)) {
+        $dias_item = str_replace(array("é", "á"), array("e", "a"), $item["dias_habilitados"]);
+        if (stripos($dias_item, $dia_buscado) === false) {
+            continue;
+        }
+    }
+
+    $productos[] = $item;
 }
 
 // Fecha mínima para el selector (mañana / 24 horas de anticipación)
