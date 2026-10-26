@@ -21,7 +21,6 @@ SET time_zone = "+00:00";
 CREATE DATABASE IF NOT EXISTS `MAI_Panaderia` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE `MAI_Panaderia`;
 
--- Deshabilitar revisión de claves foráneas para borrado y creación limpia
 SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS detalle_pedidos;
 DROP TABLE IF EXISTS pedidos;
