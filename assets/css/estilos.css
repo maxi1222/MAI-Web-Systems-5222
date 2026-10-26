@@ -1018,7 +1018,161 @@ button:disabled {
 }
 
 /* ==========================================================================
-   10. DISEÑO RESPONSIVO (Celulares y Tablets - HU01-T05 y RNF-01)
+   10. GESTIÓN DE PRODUCTOS EN PANEL INTERNO (H.U-09 / HU09-T01)
+   ========================================================================== */
+.contenedor-panel {
+    padding: 30px 20px 50px;
+}
+
+.cabecera-seccion-panel {
+    margin-bottom: 24px;
+}
+
+.cabecera-seccion-panel h2 {
+    font-family: Georgia, serif;
+    font-size: 1.8rem;
+    color: var(--color-oscuro);
+    margin-bottom: 4px;
+}
+
+.cabecera-seccion-panel p {
+    color: var(--color-texto-suave);
+    font-size: 0.95rem;
+}
+
+.seccion-formulario,
+.seccion-listado {
+    background-color: var(--color-blanco);
+    border: 1px solid var(--color-borde);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 28px;
+    box-shadow: 0 4px 12px rgba(44, 26, 17, 0.05);
+}
+
+.seccion-formulario h3,
+.seccion-listado h3 {
+    font-family: Georgia, serif;
+    font-size: 1.3rem;
+    color: var(--color-oscuro);
+    margin-bottom: 18px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--color-borde);
+}
+
+.fila-formulario-doble {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+.formulario-producto .grupo-formulario {
+    margin-bottom: 16px;
+}
+
+.fieldset-dias {
+    border: 1px solid var(--color-borde);
+    border-radius: 8px;
+    padding: 14px 16px;
+    background-color: var(--color-fondo);
+}
+
+.fieldset-dias legend {
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 0 8px;
+    color: var(--color-oscuro);
+}
+
+.checkboxes-dias {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.checkbox-dia {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: var(--color-blanco);
+    border: 1px solid var(--color-borde);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.checkbox-dia input {
+    width: auto;
+}
+
+.imagen-actual-preview {
+    margin-bottom: 10px;
+}
+
+.imagen-actual-preview img {
+    border-radius: 8px;
+    border: 1px solid var(--color-borde);
+}
+
+.acciones-formulario {
+    display: flex;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.tabla-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.tabla-productos {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.92rem;
+}
+
+.tabla-productos th,
+.tabla-productos td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--color-borde);
+    vertical-align: middle;
+}
+
+.tabla-productos th {
+    background-color: var(--color-fondo-secundario);
+    color: var(--color-oscuro);
+    font-weight: 700;
+}
+
+.miniatura-tabla {
+    width: 56px;
+    height: 44px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid var(--color-borde);
+}
+
+.sin-imagen-texto {
+    font-size: 0.8rem;
+    color: var(--color-texto-suave);
+}
+
+.celda-dias {
+    font-size: 0.85rem;
+    color: var(--color-texto-suave);
+    max-width: 240px;
+}
+
+.texto-vacio-panel {
+    color: var(--color-texto-suave);
+    padding: 15px 0;
+}
+
+/* ==========================================================================
+   11. DISEÑO RESPONSIVO (Celulares y Tablets - HU01-T05 y RNF-01)
    ========================================================================== */
 
 /* Tablets (hasta 992px): 2 columnas de productos y carrito apilado */
@@ -1102,6 +1256,18 @@ button:disabled {
     }
 
     .confirmacion-acciones .btn {
+        width: 100%;
+    }
+
+    .fila-formulario-doble {
+        grid-template-columns: 1fr;
+    }
+
+    .acciones-formulario {
+        flex-direction: column;
+    }
+
+    .acciones-formulario .btn {
         width: 100%;
     }
 

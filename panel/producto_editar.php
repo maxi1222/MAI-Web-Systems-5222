@@ -1,8 +1,13 @@
 <?php
 // panel/producto_editar.php
+// Edición de un producto existente en el panel interno (H.U-09)
 
 require_once '../includes/auth.php';
 require_once '../config/conexion.php';
+
+$ruta_base = "../";
+$pagina_panel = "productos";
+$titulo_pagina = "Editar Producto - Panel MAI Panadería";
 
 $mensaje_exito = "";
 if (isset($_SESSION["mensaje_exito"])) {
@@ -51,56 +56,42 @@ $stmt_todos->close();
 
 $dias_semana_lista = array("Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo");
 $dias_producto = array_map('trim', explode(",", (string)$producto["dias_habilitados"]));
+
+require_once '../includes/header_panel.php';
 ?>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar Producto - Panel MAI Panadería</title>
-    <link rel="stylesheet" href="../assets/css/estilos.css">
-</head>
-<body>
-    <?php
-    if (file_exists('../includes/header_panel.php') && filesize('../includes/header_panel.php') > 0) {
-        include '../includes/header_panel.php';
-    } else {
-    ?>
-    <header class="header-panel">
-        <div class="contenedor-header">
-            <h1>Panel MAI Panadería</h1>
-            <nav class="nav-panel">
-                <span>Usuario: <strong><?php echo htmlspecialchars($_SESSION["nombre"], ENT_QUOTES, 'UTF-8'); ?></strong> (<?php echo htmlspecialchars($_SESSION["rol"], ENT_QUOTES, 'UTF-8'); ?>)</span>
-                <a href="productos.php">Productos</a>
-                <a href="../catalogo.php">Ver Catálogo Público</a>
-                <a href="logout.php">Cerrar Sesión</a>
-            </nav>
-        </div>
-    </header>
-    <?php } ?>
 
-    <main class="contenedor-panel">
+<div class="contenedor contenedor-panel">
+    <div class="cabecera-seccion-panel">
         <h2>Editar Producto #<?php echo (int)$producto["id_producto"]; ?></h2>
+        <p>Modificá los datos del producto seleccionado y guardá los cambios.</p>
+    </div>
 
-        <?php if (!empty($mensaje_exito)): ?>
-            <div class="alerta alerta-exito" role="status">
-                <?php echo htmlspecialchars($mensaje_exito, ENT_QUOTES, 'UTF-8'); ?>
-            </div>
-        <?php endif; ?>
+    <?php if (!empty($mensaje_exito)): ?>
+        <div class="alerta alerta-exito" role="status">
+            <?php echo htmlspecialchars($mensaje_exito, ENT_QUOTES, 'UTF-8'); ?>
+        </div>
+    <?php endif; ?>
 
-        <?php if (!empty($mensaje_error)): ?>
-            <div class="alerta alerta-error" role="alert">
-                <?php echo htmlspecialchars($mensaje_error, ENT_QUOTES, 'UTF-8'); ?>
-            </div>
-        <?php endif; ?>
+    <?php if (!empty($mensaje_error)): ?>
+        <div class="alerta alerta-error" role="alert">
+            <?php echo htmlspecialchars($mensaje_error, ENT_QUOTES, 'UTF-8'); ?>
+        </div>
+    <?php endif; ?>
 
-        <section class="seccion-formulario">
-            <form action="acciones/producto_guardar.php" method="POST" enctype="multipart/form-data" class="formulario-producto" id="formEditarProducto">
-                <input type="hidden" name="id_producto" value="<?php echo (int)$producto["id_producto"]; ?>">
-                <input type="hidden" name="imagen_actual" value="<?php echo htmlspecialchars((string)$producto["imagen_url"], ENT_QUOTES, 'UTF-8'); ?>">
-                <input type="hidden" name="control_disponible" value="1">
-                <input type="hidden" name="permanecer_en_editar" value="1">
+    <!-- HU09-T01: Formulario de edición de producto -->
+    <section class="seccion-formulario">
+        <h3>Datos del Producto</h3>
 
+        <!-- Contenedor para alertas de validación de JavaScript (HU09-T02) -->
+        <div id="errorValidacionProductoJS" class="alerta alerta-error" style="display: none;"></div>
+
+        <form action="acciones/producto_guardar.php" method="POST" enctype="multipart/form-data" class="formulario-producto" id="formEditarProducto">
+            <input type="hidden" name="id_producto" value="<?php echo (int)$producto["id_producto"]; ?>">
+            <input type="hidden" name="imagen_actual" value="<?php echo htmlspecialchars((string)$producto["imagen_url"], ENT_QUOTES, 'UTF-8'); ?>">
+            <input type="hidden" name="control_disponible" value="1">
+            <input type="hidden" name="permanecer_en_editar" value="1">
+
+            <div class="fila-formulario-doble">
                 <div class="grupo-formulario">
                     <label for="nombre">Nombre del producto:</label>
                     <input
@@ -110,11 +101,6 @@ $dias_producto = array_map('trim', explode(",", (string)$producto["dias_habilita
                         required
                         value="<?php echo htmlspecialchars($producto["nombre"], ENT_QUOTES, 'UTF-8'); ?>"
                     >
-                </div>
-
-                <div class="grupo-formulario">
-                    <label for="descripcion">Descripción:</label>
-                    <textarea id="descripcion" name="descripcion" rows="3"><?php echo htmlspecialchars((string)$producto["descripcion"], ENT_QUOTES, 'UTF-8'); ?></textarea>
                 </div>
 
                 <div class="grupo-formulario">
@@ -129,11 +115,19 @@ $dias_producto = array_map('trim', explode(",", (string)$producto["dias_habilita
                         value="<?php echo (int)$producto["precio"]; ?>"
                     >
                 </div>
+            </div>
 
+            <div class="fila-formulario-doble">
                 <div class="grupo-formulario">
                     <label for="categoria">Categoría:</label>
                     <?php
-                    $categorias_base = array("Panificados", "Bizcochos y Facturas", "Tortas y Postres", "Confitería", "Salados");
+                    $categorias_base = array(
+                        "Panadería",
+                        "Facturería",
+                        "Tortas y Postres",
+                        "Pastelería",
+                        "Salados y Sandwichería"
+                    );
                     if (!in_array($producto["categoria"], $categorias_base) && !empty($producto["categoria"])) {
                         $categorias_base[] = $producto["categoria"];
                     }
@@ -151,53 +145,60 @@ $dias_producto = array_map('trim', explode(",", (string)$producto["dias_habilita
                     <label for="imagen">Imagen del producto (dejar vacío para mantener la actual):</label>
                     <?php if (!empty($producto["imagen_url"])): ?>
                         <div class="imagen-actual-preview">
-                            <img src="../<?php echo htmlspecialchars($producto["imagen_url"], ENT_QUOTES, 'UTF-8'); ?>" alt="Imagen actual" width="90">
+                            <img src="../<?php echo htmlspecialchars($producto["imagen_url"], ENT_QUOTES, 'UTF-8'); ?>" alt="Imagen actual" width="80">
                         </div>
                     <?php endif; ?>
                     <input type="file" id="imagen" name="imagen" accept="image/*">
                 </div>
+            </div>
 
-                <fieldset class="grupo-formulario">
-                    <legend>Días de elaboración habilitados (Lunes a Domingo):</legend>
-                    <div class="checkboxes-dias">
-                        <?php foreach ($dias_semana_lista as $dia): ?>
-                            <label class="checkbox-dia">
-                                <input
-                                    type="checkbox"
-                                    name="dias[]"
-                                    value="<?php echo htmlspecialchars($dia, ENT_QUOTES, 'UTF-8'); ?>"
-                                    <?php echo in_array($dia, $dias_producto) ? 'checked' : ''; ?>
-                                >
-                                <?php echo htmlspecialchars($dia, ENT_QUOTES, 'UTF-8'); ?>
-                            </label>
-                        <?php endforeach; ?>
-                    </div>
-                </fieldset>
+            <div class="grupo-formulario">
+                <label for="descripcion">Descripción:</label>
+                <textarea id="descripcion" name="descripcion" rows="3"><?php echo htmlspecialchars((string)$producto["descripcion"], ENT_QUOTES, 'UTF-8'); ?></textarea>
+            </div>
 
-                <div class="grupo-formulario">
-                    <label class="checkbox-disponible">
-                        <input
-                            type="checkbox"
-                            name="disponible"
-                            value="1"
-                            <?php echo ((int)$producto["disponible"] === 1) ? 'checked' : ''; ?>
-                        >
-                        Disponible para la venta (desmarcar si está Agotado)
-                    </label>
+            <fieldset class="grupo-formulario fieldset-dias">
+                <legend>Días de elaboración habilitados (Lunes a Domingo):</legend>
+                <div class="checkboxes-dias">
+                    <?php foreach ($dias_semana_lista as $dia): ?>
+                        <label class="checkbox-dia">
+                            <input
+                                type="checkbox"
+                                name="dias[]"
+                                value="<?php echo htmlspecialchars($dia, ENT_QUOTES, 'UTF-8'); ?>"
+                                <?php echo in_array($dia, $dias_producto) ? 'checked' : ''; ?>
+                            >
+                            <span><?php echo htmlspecialchars($dia, ENT_QUOTES, 'UTF-8'); ?></span>
+                        </label>
+                    <?php endforeach; ?>
                 </div>
+            </fieldset>
 
-                <div class="acciones-formulario">
-                    <button type="submit" class="btn btn-primario">Guardar Cambios</button>
-                    <a href="productos.php" class="btn btn-secundario">Volver al listado</a>
-                </div>
-            </form>
-        </section>
+            <div class="grupo-formulario">
+                <label class="checkbox-disponible">
+                    <input
+                        type="checkbox"
+                        name="disponible"
+                        value="1"
+                        <?php echo ((int)$producto["disponible"] === 1) ? 'checked' : ''; ?>
+                    >
+                    <span>Disponible para la venta (desmarcar si está Agotado)</span>
+                </label>
+            </div>
 
-        <section class="seccion-listado">
-            <h3>Listado de Productos</h3>
-            <?php if (empty($productos)): ?>
-                <p>No hay productos cargados en el catálogo todavía.</p>
-            <?php else: ?>
+            <div class="acciones-formulario">
+                <button type="submit" class="btn btn-primario">Guardar Cambios</button>
+                <a href="productos.php" class="btn btn-secundario">Volver al listado</a>
+            </div>
+        </form>
+    </section>
+
+    <section class="seccion-listado">
+        <h3>Listado de Productos</h3>
+        <?php if (empty($productos)): ?>
+            <p class="texto-vacio-panel">No hay productos cargados en el catálogo todavía.</p>
+        <?php else: ?>
+            <div class="tabla-responsive">
                 <table class="tabla-productos">
                     <thead>
                         <tr>
@@ -214,18 +215,18 @@ $dias_producto = array_map('trim', explode(",", (string)$producto["dias_habilita
                     <tbody>
                         <?php foreach ($productos as $prod): ?>
                             <tr>
-                                <td><?php echo (int)$prod["id_producto"]; ?></td>
+                                <td>#<?php echo (int)$prod["id_producto"]; ?></td>
                                 <td>
                                     <?php if (!empty($prod["imagen_url"])): ?>
-                                        <img src="../<?php echo htmlspecialchars($prod["imagen_url"], ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($prod["nombre"], ENT_QUOTES, 'UTF-8'); ?>" width="60">
+                                        <img src="../<?php echo htmlspecialchars($prod["imagen_url"], ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($prod["nombre"], ENT_QUOTES, 'UTF-8'); ?>" class="miniatura-tabla" width="60">
                                     <?php else: ?>
-                                        <span>Sin imagen</span>
+                                        <span class="sin-imagen-texto">Sin imagen</span>
                                     <?php endif; ?>
                                 </td>
-                                <td><?php echo htmlspecialchars($prod["nombre"], ENT_QUOTES, 'UTF-8'); ?></td>
-                                <td><?php echo htmlspecialchars($prod["categoria"], ENT_QUOTES, 'UTF-8'); ?></td>
-                                <td>$<?php echo (int)$prod["precio"]; ?></td>
-                                <td><?php echo htmlspecialchars($prod["dias_habilitados"], ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td><strong><?php echo htmlspecialchars($prod["nombre"], ENT_QUOTES, 'UTF-8'); ?></strong></td>
+                                <td><span class="tarjeta-categoria"><?php echo htmlspecialchars($prod["categoria"], ENT_QUOTES, 'UTF-8'); ?></span></td>
+                                <td><strong>$<?php echo (int)$prod["precio"]; ?></strong></td>
+                                <td class="celda-dias"><?php echo htmlspecialchars(str_replace(",", ", ", $prod["dias_habilitados"]), ENT_QUOTES, 'UTF-8'); ?></td>
                                 <td>
                                     <form action="acciones/producto_estado.php" method="POST" class="form-estado-stock">
                                         <input type="hidden" name="id_producto" value="<?php echo (int)$prod["id_producto"]; ?>">
@@ -243,21 +244,17 @@ $dias_producto = array_map('trim', explode(",", (string)$producto["dias_habilita
                                     </form>
                                 </td>
                                 <td>
-                                    <a href="producto_editar.php?id=<?php echo (int)$prod["id_producto"]; ?>" class="btn btn-secundario">Editar</a>
+                                    <a href="producto_editar.php?id=<?php echo (int)$prod["id_producto"]; ?>" class="btn btn-secundario btn-pequeno">Editar</a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
-            <?php endif; ?>
-        </section>
-    </main>
+            </div>
+        <?php endif; ?>
+    </section>
+</div>
 
-    <?php
-    if (file_exists('../includes/footer.php') && filesize('../includes/footer.php') > 0) {
-        include '../includes/footer.php';
-    }
-    ?>
-    <script src="../assets/js/main.js"></script>
-</body>
-</html>
+<?php
+require_once '../includes/footer.php';
+?>
