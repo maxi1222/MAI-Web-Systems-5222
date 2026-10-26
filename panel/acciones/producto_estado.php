@@ -1,6 +1,4 @@
 <?php
-// panel/acciones/producto_estado.php
-
 require_once '../../includes/auth.php';
 require_once '../../config/conexion.php';
 
