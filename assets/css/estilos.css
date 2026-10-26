@@ -1172,7 +1172,72 @@ button:disabled {
 }
 
 /* ==========================================================================
-   11. DISEÑO RESPONSIVO (Celulares y Tablets - HU01-T05 y RNF-01)
+   11. CONTROL DE STOCK EN PANEL Y ETIQUETA "AGOTADO" (H.U-08 / HU08-T01 y HU08-T03)
+   ========================================================================== */
+/* HU08-T01: Checkbox de disponibilidad en el formulario de productos */
+.checkbox-disponible {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background-color: var(--color-fondo);
+    border: 1px solid var(--color-borde);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-weight: 600;
+    font-size: 0.92rem;
+    cursor: pointer;
+}
+
+.checkbox-disponible input {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+/* HU08-T01: Interruptor (switch) de stock en la tabla de productos (Disponible / Agotado) */
+.form-estado-stock {
+    display: inline-block;
+}
+
+.switch-stock {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.switch-stock input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: var(--color-verde);
+}
+
+.estado-disponible {
+    display: inline-block;
+    background-color: var(--color-verde-fondo);
+    color: var(--color-verde);
+    border: 1px solid #6EE7B7;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: bold;
+}
+
+/* HU08-T03: Etiqueta roja "Agotado" tanto en tabla del panel como en catálogo público */
+.switch-stock .etiqueta-agotado {
+    display: inline-block;
+    background-color: var(--color-rojo);
+    color: var(--color-blanco);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: bold;
+}
+
+/* ==========================================================================
+   12. DISEÑO RESPONSIVO (Celulares y Tablets - HU01-T05 y RNF-01)
    ========================================================================== */
 
 /* Tablets (hasta 992px): 2 columnas de productos y carrito apilado */
