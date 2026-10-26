@@ -762,10 +762,266 @@ button:disabled {
 }
 
 /* ==========================================================================
-   9. DISEÑO RESPONSIVO (Celulares y Tablets - HU01-T05 y RNF-01)
+   9. CARRITO DE COMPRAS Y CONFIRMACIÓN DE PEDIDO (H.U-02 y H.U-03)
+   ========================================================================== */
+.seccion-carrito,
+.seccion-confirmacion {
+    padding: 20px 20px 40px;
+}
+
+.lista-errores {
+    margin-top: 8px;
+    padding-left: 20px;
+}
+
+.carrito-layout {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 28px;
+    align-items: start;
+}
+
+.carrito-productos-caja,
+.carrito-formulario-caja {
+    background-color: var(--color-blanco);
+    border: 1px solid var(--color-borde);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 12px rgba(44, 26, 17, 0.05);
+}
+
+.carrito-cabecera-caja {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--color-borde);
+}
+
+.carrito-cabecera-caja h2,
+.carrito-formulario-caja h2 {
+    font-family: Georgia, serif;
+    color: var(--color-oscuro);
+    font-size: 1.35rem;
+}
+
+.btn-pequeno {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+}
+
+.carrito-fila-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--color-borde);
+    gap: 15px;
+}
+
+.carrito-item-info h3 {
+    font-size: 1.05rem;
+    color: var(--color-oscuro);
+    margin-bottom: 4px;
+}
+
+.carrito-item-detalle {
+    font-size: 0.9rem;
+    color: var(--color-texto-suave);
+}
+
+.carrito-item-dias {
+    display: block;
+    margin-top: 4px;
+    color: var(--color-texto-suave);
+    font-size: 0.8rem;
+}
+
+.carrito-item-derecha {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.carrito-item-subtotal {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--color-oscuro);
+}
+
+.btn-quitar-item {
+    background-color: var(--color-rojo-fondo);
+    color: var(--color-rojo);
+    border: 1px solid #FCA5A5;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.carrito-total-barra {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--color-fondo-secundario);
+    padding: 16px;
+    border-radius: 8px;
+    margin-top: 18px;
+}
+
+.carrito-total-monto {
+    font-size: 1.35rem;
+    color: var(--color-naranja);
+}
+
+.carrito-seguir-comprando {
+    margin-top: 16px;
+}
+
+.carrito-form-ayuda {
+    font-size: 0.9rem;
+    color: var(--color-texto-suave);
+    margin: 8px 0 18px;
+}
+
+.formulario-pedido .grupo-formulario {
+    margin-bottom: 16px;
+}
+
+/* Estilos para confirmacion.php */
+.tarjeta-confirmacion {
+    background-color: var(--color-blanco);
+    border: 1px solid var(--color-borde);
+    border-radius: 12px;
+    padding: 32px;
+    max-width: 720px;
+    margin: 20px auto;
+    box-shadow: 0 4px 16px rgba(44, 26, 17, 0.06);
+}
+
+.confirmacion-encabezado {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.icono-exito-pedido {
+    width: 54px;
+    height: 54px;
+    background-color: var(--color-verde-fondo);
+    color: var(--color-verde);
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    font-weight: bold;
+    margin-bottom: 12px;
+}
+
+.confirmacion-encabezado h1 {
+    font-family: Georgia, serif;
+    color: var(--color-oscuro);
+    margin-bottom: 6px;
+}
+
+.confirmacion-encabezado p {
+    color: var(--color-texto-suave);
+}
+
+.confirmacion-datos-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    background-color: var(--color-fondo);
+    padding: 18px;
+    border-radius: 10px;
+    margin-bottom: 22px;
+}
+
+.dato-caja {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.dato-etiqueta {
+    font-size: 0.8rem;
+    color: var(--color-texto-suave);
+    text-transform: uppercase;
+}
+
+.dato-valor {
+    font-size: 1.05rem;
+    color: var(--color-oscuro);
+}
+
+.etiqueta-estado {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    width: fit-content;
+}
+
+.estado-pendiente {
+    background-color: var(--estado-pendiente-bg);
+    color: var(--estado-pendiente-txt);
+}
+
+.confirmacion-detalle-productos {
+    border-top: 1px solid var(--color-borde);
+    padding-top: 18px;
+    margin-bottom: 18px;
+}
+
+.confirmacion-detalle-productos h3 {
+    font-family: Georgia, serif;
+    margin-bottom: 12px;
+    color: var(--color-oscuro);
+}
+
+.lista-detalle-confirmacion {
+    list-style: none;
+    margin-bottom: 14px;
+}
+
+.lista-detalle-confirmacion li {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--color-borde);
+}
+
+.confirmacion-total-fila {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.15rem;
+    padding-top: 10px;
+    color: var(--color-oscuro);
+}
+
+.confirmacion-nota-bloqueo {
+    font-size: 0.85rem;
+    color: var(--color-texto-suave);
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.confirmacion-acciones {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* ==========================================================================
+   10. DISEÑO RESPONSIVO (Celulares y Tablets - HU01-T05 y RNF-01)
    ========================================================================== */
 
-/* Tablets (hasta 992px): 2 columnas de productos y filtros en 2 columnas */
+/* Tablets (hasta 992px): 2 columnas de productos y carrito apilado */
 @media (max-width: 992px) {
     .catalogo-grid {
         grid-template-columns: repeat(2, 1fr);
@@ -773,6 +1029,10 @@ button:disabled {
 
     .barra-filtros {
         grid-template-columns: 1fr 1fr;
+    }
+
+    .carrito-layout {
+        grid-template-columns: 1fr;
     }
 
     .footer-grid {
@@ -821,6 +1081,28 @@ button:disabled {
 
     .catalogo-grid {
         grid-template-columns: 1fr;
+    }
+
+    .carrito-fila-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .carrito-item-derecha {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .confirmacion-datos-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .confirmacion-acciones {
+        flex-direction: column;
+    }
+
+    .confirmacion-acciones .btn {
+        width: 100%;
     }
 
     .footer-grid {
