@@ -1,5 +1,6 @@
 // assets/js/main.js
-// Funciones JavaScript de interfaz para navegación móvil, validación de 24h en carrito y modal de aviso
+// Funciones JavaScript de interfaz para navegación móvil, validación de 24h en carrito,
+// modal de aviso (H.U-03) y validación de formulario de productos (HU09-T02)
 
 document.addEventListener("DOMContentLoaded", function () {
     // 1. Menú desplegable en celulares (Encabezado público)
@@ -114,12 +115,68 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Cerrar el modal si el usuario hace clic en el fondo oscuro fuera de la tarjeta
     if (modalCancelacion) {
         modalCancelacion.addEventListener("click", function (evento) {
             if (evento.target === modalCancelacion) {
                 modalCancelacion.classList.remove("activo");
             }
         });
+    }
+
+    // 5. HU09-T02: Validación JS en navegador para el formulario de productos (panel/productos.php y panel/producto_editar.php)
+    // Validar que el nombre sea texto y el precio sea numérico antes de enviarlo
+    var formProducto = document.getElementById("formProducto");
+    var formEditarProducto = document.getElementById("formEditarProducto");
+    var formularioGestionProd = formProducto ? formProducto : formEditarProducto;
+    var cajaErrorProductoJS = document.getElementById("errorValidacionProductoJS");
+
+    if (formularioGestionProd) {
+        formularioGestionProd.addEventListener("submit", function (evento) {
+            var inputNombreProd = document.getElementById("nombre");
+            var inputPrecioProd = document.getElementById("precio");
+            var inputCategoriaProd = document.getElementById("categoria");
+            var checkboxesDias = formularioGestionProd.querySelectorAll('input[name="dias[]"]:checked');
+
+            var nombreTexto = inputNombreProd ? inputNombreProd.value.trim() : "";
+            var precioValor = inputPrecioProd ? inputPrecioProd.value.trim() : "";
+            var categoriaValor = inputCategoriaProd ? inputCategoriaProd.value.trim() : "";
+
+            // Validar que el nombre no esté vacío y que sea texto (no solo números)
+            if (nombreTexto === "" || !isNaN(nombreTexto)) {
+                evento.preventDefault();
+                mostrarErrorProducto("El nombre del producto es obligatorio y debe ser texto válido.");
+                return;
+            }
+
+            // Validar que el precio sea numérico y mayor a 0
+            if (precioValor === "" || isNaN(precioValor) || Number(precioValor) <= 0) {
+                evento.preventDefault();
+                mostrarErrorProducto("El precio del producto debe ser un valor numérico mayor a 0.");
+                return;
+            }
+
+            // Validar que haya seleccionado categoría
+            if (categoriaValor === "") {
+                evento.preventDefault();
+                mostrarErrorProducto("Por favor, seleccione una categoría para el producto.");
+                return;
+            }
+
+            // Validar que al menos un día de la semana esté marcado
+            if (checkboxesDias.length === 0) {
+                evento.preventDefault();
+                mostrarErrorProducto("Debe seleccionar al menos un día de elaboración (Lunes a Domingo).");
+                return;
+            }
+        });
+    }
+
+    function mostrarErrorProducto(mensaje) {
+        if (cajaErrorProductoJS) {
+            cajaErrorProductoJS.textContent = mensaje;
+            cajaErrorProductoJS.style.display = "block";
+        } else {
+            alert(mensaje);
+        }
     }
 });
