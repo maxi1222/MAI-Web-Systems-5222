@@ -1,5 +1,4 @@
 <?php
-
 $vista = isset($_GET['vista']) ? $_GET['vista'] : 'diaria';
 $fecha_base = isset($_GET['fecha']) && !empty($_GET['fecha']) ? $_GET['fecha'] : date('Y-m-d');
 $filtro_estado = isset($_GET['estado']) ? $_GET['estado'] : '';
@@ -24,6 +23,7 @@ if ($vista === 'diaria') {
     $fecha_hasta = date('Y-m-t', $ts_base);
 }
 
+// HU04-T02
 $sql = "SELECT id_pedido, nombre_cliente, telefono_cliente, fecha_retiro, estado, fecha_modificacion, fecha_creacion 
         FROM pedidos WHERE 1=1";
 $tipos = "";
@@ -54,6 +54,7 @@ if ($stmt) {
     mysqli_stmt_execute($stmt);
     $res = mysqli_stmt_get_result($stmt);
 
+    // HU04-T03
     $sql_det = "SELECT dp.cantidad, dp.precio_unitario, p.nombre, p.categoria 
                 FROM detalle_pedidos dp
                 INNER JOIN productos p ON dp.id_producto = p.id_producto
@@ -91,3 +92,8 @@ if ($stmt) {
     }
     mysqli_stmt_close($stmt);
 }
+?>
+
+<?php foreach ($pedidos_agenda as $ped): ?>
+    <!-- aca va lo tuyo iñaki -->
+<?php endforeach; ?>
