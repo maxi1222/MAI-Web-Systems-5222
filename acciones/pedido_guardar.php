@@ -65,7 +65,8 @@ $fecha_hora_mysql = '';
 }
 
 
-$dia_semana_retiro = !empty($fecha_retiro_dia) ? obtener_dia_semana($fecha_retiro_dia) : '';
+$dia_con_tilde = !empty($fecha_retiro_dia) ? obtener_dia_semana($fecha_retiro_dia) : '';
+$dia_semana_retiro = str_replace(['é', 'á', 'É', 'Á'], ['e', 'a', 'E', 'A'], $dia_con_tilde);
 $items_validados = [];
 
 foreach ($_SESSION['carrito'] as $id_producto => $cantidad) {
@@ -93,7 +94,8 @@ foreach ($_SESSION['carrito'] as $id_producto => $cantidad) {
             continue;
         }
 
-        if (!empty($dia_semana_retiro) && strpos($fila_p['dias_habilitados'], $dia_semana_retiro) === false) {
+        $dias_habilitados_sin_tilde = str_replace(['é', 'á', 'É', 'Á'], ['e', 'a', 'E', 'A'], $fila_p['dias_habilitados']);
+        if (!empty($dia_semana_retiro) && stripos($dias_habilitados_sin_tilde, $dia_semana_retiro) === false) {
             $errores[] = "El producto \"" . $fila_p['nombre'] . "\" no se elabora el día seleccionado.";
             continue;
         }
