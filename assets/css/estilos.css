@@ -1237,7 +1237,164 @@ button:disabled {
 }
 
 /* ==========================================================================
-   12. DISEÑO RESPONSIVO (Celulares y Tablets - HU01-T05 y RNF-01)
+   12. AGENDA DE PEDIDOS DE COCINA Y FICHAS (H.U-04 / HU04-T01)
+   ========================================================================== */
+.barra-filtros-agenda {
+    background-color: var(--color-blanco);
+    border: 1px solid var(--color-borde);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-bottom: 18px;
+    display: grid;
+    grid-template-columns: 1.2fr 1.2fr 1.2fr auto;
+    gap: 16px;
+    align-items: end;
+}
+
+.resumen-rango-agenda {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--color-fondo-secundario);
+    border: 1px solid var(--color-borde);
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    font-size: 0.92rem;
+}
+
+.agenda-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 22px;
+}
+
+.ficha-pedido {
+    background-color: var(--color-blanco);
+    border: 1px solid var(--color-borde);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 12px rgba(44, 26, 17, 0.05);
+}
+
+.ficha-pedido-cabecera {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 12px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid var(--color-borde);
+    gap: 10px;
+}
+
+.ficha-id-grupo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ficha-id {
+    font-family: Georgia, serif;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--color-oscuro);
+}
+
+.ficha-turno {
+    background-color: var(--color-naranja-claro);
+    color: var(--color-naranja);
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+/* Colores de etiquetas de estado en las fichas de pedidos */
+.estado-preparacion {
+    background-color: var(--estado-preparacion-bg);
+    color: var(--estado-preparacion-txt);
+}
+
+.estado-listo {
+    background-color: var(--estado-listo-bg);
+    color: var(--estado-listo-txt);
+}
+
+.estado-entregado {
+    background-color: var(--estado-entregado-bg);
+    color: var(--estado-entregado-txt);
+}
+
+.ficha-pedido-cliente {
+    background-color: var(--color-fondo);
+    padding: 12px 14px;
+    border-radius: 8px;
+    margin-bottom: 14px;
+    font-size: 0.92rem;
+}
+
+.ficha-pedido-cliente p {
+    margin-bottom: 4px;
+}
+
+.ficha-pedido-productos {
+    flex: 1;
+    margin-bottom: 14px;
+}
+
+.ficha-pedido-productos h4 {
+    font-size: 0.9rem;
+    color: var(--color-texto-suave);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.lista-productos-ficha {
+    list-style: none;
+}
+
+.lista-productos-ficha li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px dashed var(--color-borde);
+    font-size: 0.92rem;
+}
+
+.cantidad-ficha {
+    font-weight: bold;
+    color: var(--color-naranja);
+    margin-right: 8px;
+}
+
+.nombre-prod-ficha {
+    flex: 1;
+}
+
+.subtotal-prod-ficha {
+    font-weight: 600;
+    color: var(--color-oscuro);
+}
+
+.ficha-pedido-pie {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 12px;
+    border-top: 1px solid var(--color-borde);
+    font-size: 0.95rem;
+}
+
+.ficha-total-monto {
+    font-size: 1.15rem;
+    color: var(--color-oscuro);
+}
+
+/* ==========================================================================
+   13. DISEÑO RESPONSIVO (Celulares y Tablets - HU01-T05 y RNF-01)
    ========================================================================== */
 
 /* Tablets (hasta 992px): 2 columnas de productos y carrito apilado */
@@ -1246,8 +1403,13 @@ button:disabled {
         grid-template-columns: repeat(2, 1fr);
     }
 
-    .barra-filtros {
+    .barra-filtros,
+    .barra-filtros-agenda {
         grid-template-columns: 1fr 1fr;
+    }
+
+    .agenda-grid {
+        grid-template-columns: 1fr;
     }
 
     .carrito-layout {
@@ -1286,8 +1448,15 @@ button:disabled {
         display: flex;
     }
 
-    .barra-filtros {
+    .barra-filtros,
+    .barra-filtros-agenda {
         grid-template-columns: 1fr;
+    }
+
+    .resumen-rango-agenda {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
     }
 
     .filtro-botones {
