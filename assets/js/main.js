@@ -179,4 +179,54 @@ document.addEventListener("DOMContentLoaded", function () {
             alert(mensaje);
         }
     }
+
+    // 6. HU05-T03: Reflejar en tiempo real el cambio de color y etiqueta según el estado del pedido en panel/agenda.php
+    var selectoresEstadoPedido = document.querySelectorAll(".select-estado-pedido");
+
+    if (selectoresEstadoPedido.length > 0) {
+        selectoresEstadoPedido.forEach(function (selector) {
+            selector.addEventListener("change", function () {
+                var nuevoEstado = selector.value;
+                var nuevaClase = "estado-pendiente";
+
+                if (nuevoEstado === "En preparación") {
+                    nuevaClase = "estado-preparacion";
+                } else if (nuevoEstado === "Listo") {
+                    nuevaClase = "estado-listo";
+                } else if (nuevoEstado === "Entregado") {
+                    nuevaClase = "estado-entregado";
+                }
+
+                // 1) Actualizar color del propio desplegable <select>
+                selector.classList.remove("estado-pendiente", "estado-preparacion", "estado-listo", "estado-entregado");
+                selector.classList.add(nuevaClase);
+
+                // 2) Buscar la tarjeta (.ficha-pedido) a la que pertenece este selector
+                var fichaPedido = selector.closest(".ficha-pedido");
+                if (fichaPedido) {
+                    // Actualizar borde superior de la tarjeta según el estado
+                    fichaPedido.classList.remove(
+                        "ficha-estado-pendiente",
+                        "ficha-estado-preparacion",
+                        "ficha-estado-listo",
+                        "ficha-estado-entregado"
+                    );
+                    fichaPedido.classList.add("ficha-" + nuevaClase);
+
+                    // 3) Actualizar el texto y color de la etiqueta superior (.etiqueta-estado)
+                    var etiquetaEstado = fichaPedido.querySelector(".etiqueta-estado");
+                    if (etiquetaEstado) {
+                        etiquetaEstado.textContent = nuevoEstado;
+                        etiquetaEstado.classList.remove(
+                            "estado-pendiente",
+                            "estado-preparacion",
+                            "estado-listo",
+                            "estado-entregado"
+                        );
+                        etiquetaEstado.classList.add(nuevaClase);
+                    }
+                }
+            });
+        });
+    }
 });

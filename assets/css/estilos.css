@@ -1394,6 +1394,85 @@ button:disabled {
 }
 
 /* ==========================================================================
+   12b. SELECTOR DE ESTADO Y COLORES EN TARJETAS (H.U-05 / HU05-T01 y HU05-T03)
+   ========================================================================== */
+/* Borde superior de cada tarjeta según el estado del pedido */
+.ficha-pedido.ficha-estado-pendiente {
+    border-top: 4px solid #F59E0B;
+}
+
+.ficha-pedido.ficha-estado-preparacion {
+    border-top: 4px solid #3B82F6;
+}
+
+.ficha-pedido.ficha-estado-listo {
+    border-top: 4px solid #10B981;
+}
+
+.ficha-pedido.ficha-estado-entregado {
+    border-top: 4px solid #9CA3AF;
+    opacity: 0.9;
+}
+
+/* Formulario selector de estado dentro de la ficha */
+.form-estado-pedido {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--color-borde);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.label-estado-pedido {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--color-texto-suave);
+    text-transform: uppercase;
+}
+
+.controles-estado-pedido {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.select-estado-pedido {
+    flex: 1;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--color-borde);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.select-estado-pedido.estado-pendiente {
+    background-color: var(--estado-pendiente-bg);
+    color: var(--estado-pendiente-txt);
+    border-color: #FCD34D;
+}
+
+.select-estado-pedido.estado-preparacion {
+    background-color: var(--estado-preparacion-bg);
+    color: var(--estado-preparacion-txt);
+    border-color: #93C5FD;
+}
+
+.select-estado-pedido.estado-listo {
+    background-color: var(--estado-listo-bg);
+    color: var(--estado-listo-txt);
+    border-color: #6EE7B7;
+}
+
+.select-estado-pedido.estado-entregado {
+    background-color: var(--estado-entregado-bg);
+    color: var(--estado-entregado-txt);
+    border-color: #D1D5DB;
+}
+
+/* ==========================================================================
    13. DISEÑO RESPONSIVO (Celulares y Tablets - HU01-T05 y RNF-01)
    ========================================================================== */
 
