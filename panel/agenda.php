@@ -4,6 +4,7 @@
 
 require_once '../includes/auth.php';
 require_once '../config/conexion.php';
+require_once '../includes/funciones.php';
 
 $ruta_base = "../";
 $pagina_panel = "agenda";
@@ -34,17 +35,15 @@ if ($vista === 'diaria') {
 }
 
 // HU04-T02: Consulta SQL preparada para filtrar pedidos por rango de fechas y ordenarlos cronológicamente
-$sql = "SELECT id_pedido, nombre_cliente, telefono_cliente, fecha_retiro, estado, fecha_modificacion, fecha_creacion 
-        FROM pedidos WHERE 1=1";
+$sql = "SELECT id_pedido, nombre_cliente, telefono_cliente, fecha_retiro, total, estado, fecha_modificacion, fecha_creacion FROM pedidos WHERE 1=1";
 $tipos = "";
 $params = array();
 
-if ($vista !== 'todos') {
-    $sql .= " AND DATE(fecha_retiro) >= ? AND DATE(fecha_retiro) <= ?";
-    $tipos .= "ss";
-    $params[] = $fecha_desde;
-    $params[] = $fecha_hasta;
-}
+$sql .= " AND DATE(fecha_retiro) >= ? AND DATE(fecha_retiro) <= ?";
+$tipos .= "ss";
+$params[] = $fecha_desde;
+$params[] = $fecha_hasta;
+
 
 if (!empty($filtro_estado)) {
     $sql .= " AND estado = ?";
@@ -92,7 +91,7 @@ if ($stmt) {
         $ped['total'] = $total_ped;
 
         $hora_num = (int)date('H', strtotime($ped['fecha_retiro']));
-        $ped['turno'] = ($hora_num < 13) ? 'Turno Mañana' : 'Turno Tarde';
+        $ped['turno'] = determinar_turno($ped['fecha_retiro']);
 
         $pedidos_agenda[] = $ped;
     }
