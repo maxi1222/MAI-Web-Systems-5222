@@ -173,7 +173,7 @@ require_once '../includes/header_panel.php';
         <div class="agenda-grid">
             <?php foreach ($pedidos_agenda as $ped): ?>
                 <?php
-                // Determinar la clase de color según el estado del pedido
+                // Determinar la clase de color según el estado del pedido (HU05-T03)
                 $clase_estado = "estado-pendiente";
                 if ($ped['estado'] === 'En preparación') {
                     $clase_estado = "estado-preparacion";
@@ -183,7 +183,7 @@ require_once '../includes/header_panel.php';
                     $clase_estado = "estado-entregado";
                 }
                 ?>
-                <article class="ficha-pedido">
+                <article class="ficha-pedido ficha-<?php echo $clase_estado; ?>">
                     <div class="ficha-pedido-cabecera">
                         <div class="ficha-id-grupo">
                             <span class="ficha-id">Pedido #<?php echo (int)$ped['id_pedido']; ?></span>
@@ -221,6 +221,30 @@ require_once '../includes/header_panel.php';
                         <span>Total del encargo:</span>
                         <strong class="ficha-total-monto">$<?php echo (int)$ped['total']; ?></strong>
                     </div>
+
+                    <!-- HU05-T01: Selector interactivo en cada tarjeta con los 4 estados permitidos -->
+                    <form action="acciones/pedido_estado.php" method="POST" class="form-estado-pedido">
+                        <input type="hidden" name="id_pedido" value="<?php echo (int)$ped['id_pedido']; ?>">
+                        <input type="hidden" name="vista_actual" value="<?php echo htmlspecialchars($vista, ENT_QUOTES, 'UTF-8'); ?>">
+                        <input type="hidden" name="fecha_actual" value="<?php echo htmlspecialchars($fecha_base, ENT_QUOTES, 'UTF-8'); ?>">
+
+                        <label for="select_estado_<?php echo (int)$ped['id_pedido']; ?>" class="label-estado-pedido">
+                            Cambiar estado:
+                        </label>
+                        <div class="controles-estado-pedido">
+                            <select
+                                id="select_estado_<?php echo (int)$ped['id_pedido']; ?>"
+                                name="estado"
+                                class="select-estado-pedido <?php echo $clase_estado; ?>"
+                            >
+                                <option value="Pendiente" <?php echo ($ped['estado'] === 'Pendiente') ? 'selected' : ''; ?>>Pendiente</option>
+                                <option value="En preparación" <?php echo ($ped['estado'] === 'En preparación') ? 'selected' : ''; ?>>En preparación</option>
+                                <option value="Listo" <?php echo ($ped['estado'] === 'Listo') ? 'selected' : ''; ?>>Listo</option>
+                                <option value="Entregado" <?php echo ($ped['estado'] === 'Entregado') ? 'selected' : ''; ?>>Entregado</option>
+                            </select>
+                            <button type="submit" class="btn btn-primario btn-pequeno">Guardar</button>
+                        </div>
+                    </form>
                 </article>
             <?php endforeach; ?>
         </div>
