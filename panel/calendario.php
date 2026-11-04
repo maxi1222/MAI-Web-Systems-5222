@@ -76,9 +76,29 @@ if ($stmt) {
             $pedidos_por_dia[$dia_num] = array();
         }
         $pedidos_por_dia[$dia_num][] = $fila;
-        $total_pedidos_mes++;
     }
     $stmt->close();
+}
+
+// HU06-T02: Consulta SQL de conteo diario de pedidos agrupado por día del mes
+$conteo_diario = array();
+$sql_agg = "SELECT DAY(fecha_retiro) AS dia, COUNT(*) AS total
+            FROM pedidos
+            WHERE MONTH(fecha_retiro) = ? AND YEAR(fecha_retiro) = ?
+            GROUP BY DAY(fecha_retiro)";
+$stmt_agg = $conexion->prepare($sql_agg);
+
+if ($stmt_agg) {
+    $stmt_agg->bind_param("ii", $mes_seleccionado, $anio_seleccionado);
+    $stmt_agg->execute();
+    $resultado_agg = $stmt_agg->get_result();
+
+    while ($fila_agg = $resultado_agg->fetch_assoc()) {
+        $dia_num = (int)$fila_agg['dia'];
+        $conteo_diario[$dia_num] = (int)$fila_agg['total'];
+    }
+    $stmt_agg->close();
+    $total_pedidos_mes = array_sum($conteo_diario);
 }
 
 $fecha_hoy_str = date('Y-m-d');

@@ -1,5 +1,8 @@
 <?php
+// panel/acciones/pedido_estado.php
+// Actualización del estado de un pedido en la base de datos (H.U-05 / HU05-T02)
 
+require_once '../../includes/auth.php';
 require_once '../../config/conexion.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -7,12 +10,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
-$id_pedido    = isset($_POST['id_pedido']) ? (int)$_POST['id_pedido'] : 0;
-$nuevo_estado = trim($_POST['estado'] ?? $_POST['nuevo_estado'] ?? '');
+$id_pedido    = (isset($_POST['id_pedido']) && is_numeric($_POST['id_pedido'])) ? (int)$_POST['id_pedido'] : 0;
+$nuevo_estado = isset($_POST['estado']) ? trim($_POST['estado']) : (isset($_POST['nuevo_estado']) ? trim($_POST['nuevo_estado']) : '');
+$vista_actual = isset($_POST['vista_actual']) ? trim($_POST['vista_actual']) : 'diaria';
+$fecha_actual = isset($_POST['fecha_actual']) ? trim($_POST['fecha_actual']) : date('Y-m-d');
 
-$estados_validos = ['Pendiente', 'En preparación', 'Listo', 'Entregado'];
-
-$errores = [];
+$estados_validos = array('Pendiente', 'En preparación', 'Listo', 'Entregado');
+$errores = array();
 
 if ($id_pedido <= 0) {
     $errores[] = "El ID del pedido no es válido.";
@@ -22,27 +26,30 @@ if (!in_array($nuevo_estado, $estados_validos, true)) {
     $errores[] = "El estado seleccionado no es válido.";
 }
 
-// Si hay errores, redirigimos o mostramos el error
+$url_retorno = "../agenda.php?vista=" . urlencode($vista_actual) . "&fecha=" . urlencode($fecha_actual);
+
 if (!empty($errores)) {
-    header("Location: ../agenda.php?error=datos_invalidos");
+    header("Location: " . $url_retorno . "&error=datos_invalidos");
     exit();
 }
 
 $sql = "UPDATE pedidos SET estado = ?, fecha_modificacion = NOW() WHERE id_pedido = ?";
-$stmt = mysqli_prepare($conexion, $sql);
+$stmt = $conexion->prepare($sql);
 
 if ($stmt) {
-    mysqli_stmt_bind_param($stmt, "si", $nuevo_estado, $id_pedido);
-    
-    if (mysqli_stmt_execute($stmt)) {
-        header("Location: ../agenda.php?msg=estado_actualizado");
+    $stmt->bind_param("si", $nuevo_estado, $id_pedido);
+
+    if ($stmt->execute()) {
+        $stmt->close();
+        header("Location: " . $url_retorno . "&msg=estado_actualizado");
         exit();
     } else {
-        echo "Error al actualizar el estado en la base de datos.";
+        $stmt->close();
+        header("Location: " . $url_retorno . "&error=db");
+        exit();
     }
-    
-    mysqli_stmt_close($stmt);
 } else {
-    echo "No se pudo preparar la consulta SQL.";
+    header("Location: " . $url_retorno . "&error=prepare");
+    exit();
 }
 ?>

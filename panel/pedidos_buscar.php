@@ -147,7 +147,7 @@ require_once '../includes/header_panel.php';
             <div class="tabla-responsive">
                 <table class="tabla-productos tabla-pedidos-buscar">
                     <thead>
-                        <tr class="<?php echo $clase_estado; ?>">
+                        <tr>
                             <th>ID</th>
                             <th>Cliente</th>
                             <th>Teléfono</th>
