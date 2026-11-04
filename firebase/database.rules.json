@@ -1,0 +1,19 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "likes_productos": {
+      ".read": true,
+      "$prod_key": {
+        ".write": true,
+        ".validate": "newData.hasChildren(['id_producto', 'total'])",
+        "id_producto": {
+          ".validate": "newData.isNumber() && newData.val() > 0"
+        },
+        "total": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        }
+      }
+    }
+  }
+}
