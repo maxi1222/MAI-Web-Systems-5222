@@ -35,15 +35,15 @@ if ($vista === 'diaria') {
 }
 
 // HU04-T02: Consulta SQL preparada para filtrar pedidos por rango de fechas y ordenarlos cronológicamente
-$sql = "SELECT id_pedido, nombre_cliente, telefono_cliente, fecha_retiro, total, estado, fecha_modificacion, fecha_creacion FROM pedidos WHERE 1=1";
+$sql = "SELECT id_pedido, nombre_cliente, telefono_cliente, fecha_retiro, estado, fecha_modificacion, fecha_creacion FROM pedidos WHERE 1=1";
 $tipos = "";
 $params = array();
-
-$sql .= " AND DATE(fecha_retiro) >= ? AND DATE(fecha_retiro) <= ?";
-$tipos .= "ss";
-$params[] = $fecha_desde;
-$params[] = $fecha_hasta;
-
+if ($vista !== 'todos'){
+    $sql .= " AND DATE(fecha_retiro) >= ? AND DATE(fecha_retiro) <= ?";
+    $tipos .= "ss";
+    $params[] = $fecha_desde;
+    $params[] = $fecha_hasta;
+}
 
 if (!empty($filtro_estado)) {
     $sql .= " AND estado = ?";
