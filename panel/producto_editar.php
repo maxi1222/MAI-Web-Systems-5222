@@ -174,16 +174,31 @@ require_once '../includes/header_panel.php';
                 </div>
             </fieldset>
 
-            <div class="grupo-formulario">
-                <label class="checkbox-disponible">
-                    <input
-                        type="checkbox"
-                        name="disponible"
-                        value="1"
-                        <?php echo ((int)$producto["disponible"] === 1) ? 'checked' : ''; ?>
-                    >
-                    <span>Disponible para la venta (desmarcar si está Agotado)</span>
-                </label>
+            <div class="fila-checkboxes-estado">
+                <div class="grupo-formulario">
+                    <label class="checkbox-disponible">
+                        <input
+                            type="checkbox"
+                            name="disponible"
+                            value="1"
+                            <?php echo ((int)$producto["disponible"] === 1) ? 'checked' : ''; ?>
+                        >
+                        <span>Disponible para la venta (desmarcar si está Agotado)</span>
+                    </label>
+                </div>
+
+                <!-- HU10-T01: Checkbox opcional "Destacado" en el formulario de edición de productos -->
+                <div class="grupo-formulario">
+                    <label class="checkbox-disponible checkbox-destacado">
+                        <input
+                            type="checkbox"
+                            name="destacado"
+                            value="1"
+                            <?php echo ((int)$producto["destacado"] === 1) ? 'checked' : ''; ?>
+                        >
+                        <span>★ Destacado (mostrar en la portada de Inicio)</span>
+                    </label>
+                </div>
             </div>
 
             <div class="acciones-formulario">
@@ -208,6 +223,7 @@ require_once '../includes/header_panel.php';
                             <th>Categoría</th>
                             <th>Precio</th>
                             <th>Días Habilitados</th>
+                            <th>Destacado</th>
                             <th>Estado (Stock)</th>
                             <th>Acciones</th>
                         </tr>
@@ -230,6 +246,23 @@ require_once '../includes/header_panel.php';
                                 <td>
                                     <form action="acciones/producto_estado.php" method="POST" class="form-estado-stock">
                                         <input type="hidden" name="id_producto" value="<?php echo (int)$prod["id_producto"]; ?>">
+                                        <input type="hidden" name="accion" value="destacado">
+                                        <input type="hidden" name="destacado" value="<?php echo ((int)$prod["destacado"] === 1) ? 0 : 1; ?>">
+                                        <label class="switch-stock">
+                                            <input
+                                                type="checkbox"
+                                                onchange="this.form.submit()"
+                                                <?php echo ((int)$prod["destacado"] === 1) ? 'checked' : ''; ?>
+                                            >
+                                            <span class="<?php echo ((int)$prod["destacado"] === 1) ? 'estado-destacado-activo' : 'estado-destacado-inactivo'; ?>">
+                                                <?php echo ((int)$prod["destacado"] === 1) ? '★ Destacado' : 'Normal'; ?>
+                                            </span>
+                                        </label>
+                                    </form>
+                                </td>
+                                <td>
+                                    <form action="acciones/producto_estado.php" method="POST" class="form-estado-stock">
+                                        <input type="hidden" name="id_producto" value="<?php echo (int)$prod["id_producto"]; ?>">
                                         <input type="hidden" name="disponible" value="<?php echo ((int)$prod["disponible"] === 1) ? 0 : 1; ?>">
                                         <label class="switch-stock">
                                             <input
@@ -244,7 +277,13 @@ require_once '../includes/header_panel.php';
                                     </form>
                                 </td>
                                 <td>
-                                    <a href="producto_editar.php?id=<?php echo (int)$prod["id_producto"]; ?>" class="btn btn-secundario btn-pequeno">Editar</a>
+                                    <div class="acciones-fila-tabla">
+                                        <a href="producto_editar.php?id=<?php echo (int)$prod["id_producto"]; ?>" class="btn btn-secundario btn-pequeno">Editar</a>
+                                        <form action="acciones/producto_baja.php" method="POST" class="form-baja-producto" onsubmit="return confirm('¿Estás seguro de que deseás dar de baja este producto?');">
+                                            <input type="hidden" name="id_producto" value="<?php echo (int)$prod["id_producto"]; ?>">
+                                            <button type="submit" class="btn-quitar-item">Dar de baja</button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

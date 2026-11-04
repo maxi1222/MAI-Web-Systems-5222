@@ -21,6 +21,8 @@ if (isset($_POST["disponible"])) {
     $disponible = isset($_POST["control_disponible"]) ? 0 : 1;
 }
 
+$destacado = isset($_POST["destacado"]) ? 1 : 0;
+
 $dias_elegidos = array();
 if (isset($_POST["dias"]) && is_array($_POST["dias"])) {
     $dias_elegidos = $_POST["dias"];
@@ -109,30 +111,32 @@ if ($id_producto > 0 && empty($imagen_url)) {
 }
 
 if ($id_producto > 0) {
-    $sql = "UPDATE productos SET nombre = ?, descripcion = ?, precio = ?, categoria = ?, imagen_url = ?, disponible = ?, dias_habilitados = ? WHERE id_producto = ?";
+    $sql = "UPDATE productos SET nombre = ?, descripcion = ?, precio = ?, categoria = ?, imagen_url = ?, disponible = ?, destacado = ?, dias_habilitados = ? WHERE id_producto = ?";
     $stmt = $conexion->prepare($sql);
     $stmt->bind_param(
-        "ssissisi",
+        "ssissiisi",
         $nombre,
         $descripcion,
         $precio_entero,
         $categoria,
         $imagen_url,
         $disponible,
+        $destacado,
         $dias_habilitados,
         $id_producto
     );
 } else {
-    $sql = "INSERT INTO productos (nombre, descripcion, precio, categoria, imagen_url, disponible, dias_habilitados) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    $sql = "INSERT INTO productos (nombre, descripcion, precio, categoria, imagen_url, disponible, destacado, dias_habilitados) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     $stmt = $conexion->prepare($sql);
     $stmt->bind_param(
-        "ssissis",
+        "ssissiis",
         $nombre,
         $descripcion,
         $precio_entero,
         $categoria,
         $imagen_url,
         $disponible,
+        $destacado,
         $dias_habilitados
     );
 }

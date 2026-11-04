@@ -60,5 +60,6 @@ $telefono_mostrar = defined('TELEFONO_LOCAL') ? TELEFONO_LOCAL : "098 318 851";
     </footer>
 
     <script src="<?php echo $ruta_base; ?>assets/js/main.js"></script>
+    <script src="<?php echo $ruta_base; ?>assets/js/firebase_likes.js"></script>
 </body>
 </html>
