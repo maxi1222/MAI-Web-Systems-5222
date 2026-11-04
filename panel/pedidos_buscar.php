@@ -147,7 +147,7 @@ require_once '../includes/header_panel.php';
             <div class="tabla-responsive">
                 <table class="tabla-productos tabla-pedidos-buscar">
                     <thead>
-                        <tr>
+                        <tr class="<?php echo $clase_estado; ?>">
                             <th>ID</th>
                             <th>Cliente</th>
                             <th>Teléfono</th>
@@ -169,7 +169,7 @@ require_once '../includes/header_panel.php';
                                 $clase_estado = "estado-entregado";
                             }
                             ?>
-                            <tr>
+                            <tr class="<?php echo $clase_estado; ?>">
                                 <td><strong>#<?php echo (int)$ped['id_pedido']; ?></strong></td>
                                 <td><?php echo htmlspecialchars($ped['nombre_cliente'], ENT_QUOTES, 'UTF-8'); ?></td>
                                 <td><?php echo htmlspecialchars($ped['telefono_cliente'], ENT_QUOTES, 'UTF-8'); ?></td>

@@ -78,28 +78,7 @@ if ($stmt) {
         $pedidos_por_dia[$dia_num][] = $fila;
         $total_pedidos_mes++;
     }
-    <?php
-// --- Conteo diario de pedidos (agrupado) ---
-$sql_agg = "SELECT DAY(fecha_retiro) AS dia, COUNT(*) AS total FROM pedidos WHERE MONTH(fecha_retiro) = ? AND YEAR(fecha_retiro) = ? GROUP BY DAY(fecha_retiro)";
-$stmt_agg = $conexion->prepare($sql_agg);
-if ($stmt_agg) {
-    $stmt_agg->bind_param("ii", $mes_seleccionado, $anio_seleccionado);
-    $stmt_agg->execute();
-    $resultado_agg = $stmt_agg->get_result();
-    $conteo_diario = [];
-    while ($fila_agg = $resultado_agg->fetch_assoc()) {
-        $dia_num = (int)$fila_agg['dia'];
-        $conteo_diario[$dia_num] = (int)$fila_agg['total'];
-    }
-    $stmt_agg->close();
-    // Actualizamos total de pedidos del mes usando el conteo agregado
-    $total_pedidos_mes = array_sum($conteo_diario);
-} else {
-    // Si falla la preparación, dejamos contadores vacíos
-    $conteo_diario = [];
-    $total_pedidos_mes = 0;
-}
-?>
+    $stmt->close();
 }
 
 $fecha_hoy_str = date('Y-m-d');
