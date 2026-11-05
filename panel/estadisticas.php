@@ -1,15 +1,17 @@
 <?php
 // panel/estadisticas.php
-// Estadísticas de ventas con selector de período (Semanal, Mensual, Anual) y tarjetas de métricas (H.U-11 / HU11-T01)
 
 require_once '../includes/auth.php';
+
+requerir_administrador();
+
 require_once '../config/conexion.php';
 
 $ruta_base = "../";
 $pagina_panel = "estadisticas";
 $titulo_pagina = "Estadísticas de Ventas - Panel MAI Panadería";
 
-// HU11-T01: Capturar el período seleccionado (Semanal, Mensual o Anual) y la fecha base
+// Procesar selector de período (semanal, mensual o anual) y fecha base
 $periodo = isset($_GET['periodo']) ? trim($_GET['periodo']) : 'mensual';
 if ($periodo !== 'semanal' && $periodo !== 'mensual' && $periodo !== 'anual') {
     $periodo = 'mensual';
@@ -22,7 +24,7 @@ if ($ts_base === false) {
     $ts_base = time();
 }
 
-// Determinar el rango de fechas ($fecha_desde y $fecha_hasta) según el período elegido
+// Procesar rango de fechas ($fecha_desde y $fecha_hasta) según el período seleccionado
 if ($periodo === 'semanal') {
     // Últimos 7 días hasta la fecha de referencia
     $fecha_desde = date('Y-m-d', strtotime('-6 days', $ts_base));
@@ -41,62 +43,90 @@ if ($periodo === 'semanal') {
     $etiqueta_periodo = "Período Mensual (" . date('m/Y', $ts_base) . ")";
 }
 
-// Variables principales para las 3 tarjetas de métricas (HU11-T01)
+// Contemplar períodos sin ventas inicializando valores en cero sin errores
 $total_recaudado = 0;
 $cantidad_encargos = 0;
 $producto_mas_vendido_nombre = "Sin ventas registradas";
 $producto_mas_vendido_unidades = 0;
 $ranking_productos = array();
 
-// 1. Consulta preparada para contar la cantidad total de encargos en el período
-$sql_encargos = "SELECT COUNT(*) AS total_pedidos
-                 FROM pedidos
-                 WHERE DATE(fecha_retiro) >= ? AND DATE(fecha_retiro) <= ?";
-$stmt_enc = $conexion->prepare($sql_encargos);
+// Consulta SQL de métricas y ventas filtrando únicamente pedidos concretados (WHERE p.estado = 'Entregado')
+// con funciones de agregación (COALESCE(SUM(dp.cantidad * dp.precio_unitario), 0), COUNT(DISTINCT p.id_pedido))
+$sql_metricas = "SELECT 
+                    COALESCE(SUM(dp.cantidad * dp.precio_unitario), 0) AS total_recaudado,
+                    COUNT(DISTINCT p.id_pedido) AS total_pedidos
+                 FROM pedidos p
+                 LEFT JOIN detalle_pedidos dp ON p.id_pedido = dp.id_pedido
+                 WHERE p.estado = 'Entregado'
+                   AND DATE(p.fecha_retiro) >= ?
+                   AND DATE(p.fecha_retiro) <= ?";
+$stmt_met = $conexion->prepare($sql_metricas);
 
-if ($stmt_enc) {
-    $stmt_enc->bind_param("ss", $fecha_desde, $fecha_hasta);
-    $stmt_enc->execute();
-    $res_enc = $stmt_enc->get_result();
-    if ($fila_enc = $res_enc->fetch_assoc()) {
-        $cantidad_encargos = (int)$fila_enc['total_pedidos'];
+if ($stmt_met) {
+    $stmt_met->bind_param("ss", $fecha_desde, $fecha_hasta);
+    $stmt_met->execute();
+    $res_met = $stmt_met->get_result();
+    if ($fila_met = $res_met->fetch_assoc()) {
+        $total_recaudado = (int)$fila_met['total_recaudado'];
+        $cantidad_encargos = (int)$fila_met['total_pedidos'];
     }
-    $stmt_enc->close();
+    $stmt_met->close();
 }
 
-// 2. Consulta preparada para calcular el total recaudado y el ranking de productos vendidos en el período
-$sql_ventas = "SELECT p.id_producto,
-                      p.nombre,
-                      p.categoria,
-                      SUM(dp.cantidad) AS unidades_vendidas,
-                      SUM(dp.cantidad * dp.precio_unitario) AS subtotal_recaudado
-               FROM detalle_pedidos dp
-               INNER JOIN pedidos ped ON dp.id_pedido = ped.id_pedido
-               INNER JOIN productos p ON dp.id_producto = p.id_producto
-               WHERE DATE(ped.fecha_retiro) >= ? AND DATE(ped.fecha_retiro) <= ?
-               GROUP BY p.id_producto, p.nombre, p.categoria
-               ORDER BY unidades_vendidas DESC, subtotal_recaudado DESC";
-$stmt_ven = $conexion->prepare($sql_ventas);
+// Consulta SQL para obtener el producto más vendido con agrupamiento y límite:
+// (GROUP BY dp.id_producto ORDER BY SUM(dp.cantidad) DESC LIMIT 1) filtrando pedidos concretados (WHERE ped.estado = 'Entregado')
+$sql_top_producto = "SELECT 
+                        p.nombre,
+                        SUM(dp.cantidad) AS unidades_vendidas
+                     FROM detalle_pedidos dp
+                     INNER JOIN pedidos ped ON dp.id_pedido = ped.id_pedido
+                     INNER JOIN productos p ON dp.id_producto = p.id_producto
+                     WHERE ped.estado = 'Entregado'
+                       AND DATE(ped.fecha_retiro) >= ?
+                       AND DATE(ped.fecha_retiro) <= ?
+                     GROUP BY dp.id_producto, p.nombre
+                     ORDER BY SUM(dp.cantidad) DESC
+                     LIMIT 1";
 
-if ($stmt_ven) {
-    $stmt_ven->bind_param("ss", $fecha_desde, $fecha_hasta);
-    $stmt_ven->execute();
-    $res_ven = $stmt_ven->get_result();
+$stmt_top = $conexion->prepare($sql_top_producto);
 
-    while ($fila_ven = $res_ven->fetch_assoc()) {
-        $unidades = (int)$fila_ven['unidades_vendidas'];
-        $recaudado_prod = (int)$fila_ven['subtotal_recaudado'];
-
-        $total_recaudado += $recaudado_prod;
-        $ranking_productos[] = $fila_ven;
-
-        // El primer registro (ordenado por unidades_vendidas DESC) es el producto más vendido
-        if ($producto_mas_vendido_unidades === 0 && $unidades > 0) {
-            $producto_mas_vendido_nombre = $fila_ven['nombre'];
-            $producto_mas_vendido_unidades = $unidades;
-        }
+if ($stmt_top) {
+    $stmt_top->bind_param("ss", $fecha_desde, $fecha_hasta);
+    $stmt_top->execute();
+    $res_top = $stmt_top->get_result();
+    if ($fila_top = $res_top->fetch_assoc()) {
+        $producto_mas_vendido_nombre = $fila_top['nombre'];
+        $producto_mas_vendido_unidades = (int)$fila_top['unidades_vendidas'];
     }
-    $stmt_ven->close();
+    $stmt_top->close();
+}
+
+// Detalle y ranking completo de ventas por producto (WHERE ped.estado = 'Entregado')
+$sql_ranking = "SELECT 
+                    p.id_producto,
+                    p.nombre,
+                    p.categoria,
+                    SUM(dp.cantidad) AS unidades_vendidas,
+                    COALESCE(SUM(dp.cantidad * dp.precio_unitario), 0) AS subtotal_recaudado
+                FROM detalle_pedidos dp
+                INNER JOIN pedidos ped ON dp.id_pedido = ped.id_pedido
+                INNER JOIN productos p ON dp.id_producto = p.id_producto
+                WHERE ped.estado = 'Entregado'
+                  AND DATE(ped.fecha_retiro) >= ?
+                  AND DATE(ped.fecha_retiro) <= ?
+                GROUP BY p.id_producto, p.nombre, p.categoria
+                ORDER BY unidades_vendidas DESC, subtotal_recaudado DESC";
+
+$stmt_rank = $conexion->prepare($sql_ranking);
+
+if ($stmt_rank) {
+    $stmt_rank->bind_param("ss", $fecha_desde, $fecha_hasta);
+    $stmt_rank->execute();
+    $res_rank = $stmt_rank->get_result();
+    while ($fila_rank = $res_rank->fetch_assoc()) {
+        $ranking_productos[] = $fila_rank;
+    }
+    $stmt_rank->close();
 }
 
 require_once '../includes/header_panel.php';
@@ -108,7 +138,7 @@ require_once '../includes/header_panel.php';
         <p>Consultá el resumen comercial de la panadería filtrando por período Semanal, Mensual o Anual.</p>
     </div>
 
-    <!-- HU11-T01: Formulario selector de período (Semanal, Mensual, Anual) -->
+    <!-- Formulario selector de período (Semanal, Mensual, Anual) -->
     <form action="estadisticas.php" method="GET" class="barra-filtros-estadisticas">
         <div class="filtro-item">
             <label for="periodo">Período de análisis:</label>
@@ -141,7 +171,7 @@ require_once '../includes/header_panel.php';
         <span>Rango: <strong><?php echo date('d/m/Y', strtotime($fecha_desde)); ?></strong> al <strong><?php echo date('d/m/Y', strtotime($fecha_hasta)); ?></strong></span>
     </div>
 
-    <!-- HU11-T01: Tarjetas de métricas (Total recaudado, Cantidad de encargos y Producto más vendido) -->
+    <!-- Tarjetas de métricas (Total recaudado, Cantidad de encargos y Producto más vendido) -->
     <section class="metricas-grid">
         <!-- Tarjeta 1: Total Recaudado -->
         <article class="tarjeta-metrica metrica-recaudacion">
@@ -160,7 +190,7 @@ require_once '../includes/header_panel.php';
                 <span class="metrica-icono" aria-hidden="true">📦</span>
             </div>
             <p class="metrica-valor"><?php echo $cantidad_encargos; ?></p>
-            <span class="metrica-subtexto">Pedidos registrados entre las fechas consultadas</span>
+            <span class="metrica-subtexto">Pedidos entregados en el período seleccionado</span>
         </article>
 
         <!-- Tarjeta 3: Producto Más Vendido -->

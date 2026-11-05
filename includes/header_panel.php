@@ -39,7 +39,9 @@ $rol_usuario = isset($_SESSION["rol"]) ? $_SESSION["rol"] : "Empleado";
                 <a href="calendario.php" class="nav-panel-link <?php echo ($pagina_panel === 'calendario') ? 'activo' : ''; ?>">Calendario Mensual</a>
                 <a href="pedidos_buscar.php" class="nav-panel-link <?php echo ($pagina_panel === 'buscar') ? 'activo' : ''; ?>">Buscar Pedidos</a>
                 <a href="productos.php" class="nav-panel-link <?php echo ($pagina_panel === 'productos') ? 'activo' : ''; ?>">Catálogo y Stock</a>
-                <a href="estadisticas.php" class="nav-panel-link <?php echo ($pagina_panel === 'estadisticas') ? 'activo' : ''; ?>">Estadísticas</a>
+                <?php if (es_administrador()): ?>
+                    <a href="estadisticas.php" class="nav-panel-link <?php echo ($pagina_panel === 'estadisticas') ? 'activo' : ''; ?>">Estadísticas</a>
+                <?php endif; ?>
                 <a href="<?php echo $ruta_base; ?>index.php" class="nav-panel-link nav-panel-tienda">Ver Tienda ↗</a>
             </nav>
 
