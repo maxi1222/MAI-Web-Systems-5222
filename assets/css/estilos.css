@@ -1698,6 +1698,267 @@ button:disabled {
 }
 
 /* ==========================================================================
+   12e. ESTADÍSTICAS DE VENTAS Y TARJETAS DE MÉTRICAS (H.U-11 / HU11-T01)
+   ========================================================================== */
+.barra-filtros-estadisticas {
+    background-color: var(--color-blanco);
+    border: 1px solid var(--color-borde);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-bottom: 18px;
+    display: grid;
+    grid-template-columns: 1.5fr 1.2fr auto;
+    gap: 16px;
+    align-items: end;
+}
+
+.metricas-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
+    margin-bottom: 28px;
+}
+
+.tarjeta-metrica {
+    background-color: var(--color-blanco);
+    border: 1px solid var(--color-borde);
+    border-radius: 12px;
+    padding: 22px 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 4px 12px rgba(44, 26, 17, 0.05);
+}
+
+.tarjeta-metrica.metrica-recaudacion {
+    border-top: 4px solid var(--color-verde);
+}
+
+.tarjeta-metrica.metrica-encargos {
+    border-top: 4px solid var(--color-naranja);
+}
+
+.tarjeta-metrica.metrica-estrella {
+    border-top: 4px solid #F59E0B;
+}
+
+.metrica-cabecera {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.metrica-titulo {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--color-texto-suave);
+    letter-spacing: 0.4px;
+}
+
+.metrica-icono {
+    font-size: 1.5rem;
+    background-color: var(--color-fondo);
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-borde);
+}
+
+.metrica-valor {
+    font-family: Georgia, serif;
+    font-size: 2.1rem;
+    font-weight: bold;
+    color: var(--color-oscuro);
+    margin-bottom: 8px;
+    line-height: 1.2;
+}
+
+.metrica-valor-producto {
+    font-size: 1.35rem;
+}
+
+.metrica-subtexto {
+    font-size: 0.86rem;
+    color: var(--color-texto-suave);
+}
+
+.badge-posicion {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    background-color: var(--color-fondo-secundario);
+    color: var(--color-oscuro);
+}
+
+.badge-posicion.posicion-oro {
+    background-color: #FEF3C7;
+    color: #92400E;
+    border: 1px solid #FCD34D;
+}
+
+/* ==========================================================================
+   12f. PORTADA DE INICIO, PRODUCTOS DESTACADOS Y LIKES (H.U-10 / HU10-T01)
+   ========================================================================== */
+.hero-inicio {
+    background: linear-gradient(135deg, #2C1A11 0%, #4A2E1F 100%);
+    color: var(--color-blanco);
+    padding: 64px 0;
+    border-bottom: 4px solid var(--color-naranja);
+    margin-bottom: 42px;
+}
+
+.hero-contenido {
+    max-width: 760px;
+}
+
+.hero-etiqueta {
+    display: inline-block;
+    background-color: rgba(211, 84, 0, 0.28);
+    border: 1px solid #F5B041;
+    color: #FAD7A0;
+    padding: 5px 14px;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 14px;
+}
+
+.hero-contenido h1 {
+    font-family: Georgia, serif;
+    font-size: 2.5rem;
+    line-height: 1.2;
+    margin-bottom: 14px;
+    color: var(--color-blanco);
+}
+
+.hero-contenido p {
+    font-size: 1.08rem;
+    color: #E6DDD6;
+    margin-bottom: 24px;
+    max-width: 660px;
+}
+
+.hero-botones {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.hero-botones .btn-secundario {
+    background-color: var(--color-blanco);
+    color: var(--color-oscuro);
+    border-color: var(--color-blanco);
+}
+
+.seccion-destacados {
+    padding-bottom: 50px;
+}
+
+.destacados-encabezado {
+    margin-bottom: 28px;
+}
+
+.destacados-footer-cta {
+    margin-top: 36px;
+    background-color: var(--color-fondo-secundario);
+    border: 1px solid var(--color-borde);
+    border-radius: 12px;
+    padding: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.destacados-footer-cta p {
+    font-weight: 600;
+    color: var(--color-oscuro);
+    font-size: 1.02rem;
+}
+
+/* Interfaz de Likes (Firebase): Botón de corazón (♡ / ♥) y contador */
+.btn-like {
+    transition: transform 0.15s ease, background-color 0.2s ease, border-color 0.2s ease;
+    box-shadow: 0 2px 6px rgba(44, 26, 17, 0.12);
+}
+
+.btn-like:hover {
+    transform: scale(1.06);
+    border-color: var(--color-rojo);
+}
+
+.corazon-icono {
+    font-size: 1rem;
+    line-height: 1;
+    color: var(--color-rojo);
+}
+
+.btn-like.like-activo .corazon-icono {
+    color: var(--color-rojo);
+}
+
+.like-contador {
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+/* Checkbox y etiquetas de "Destacado" en el panel de productos (HU10-T01) */
+.fila-checkboxes-estado {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 10px;
+}
+
+.checkbox-destacado {
+    background-color: #FFFBEB;
+    border-color: #FCD34D;
+}
+
+.estado-destacado-activo {
+    display: inline-block;
+    background-color: #FEF3C7;
+    color: #92400E;
+    border: 1px solid #FCD34D;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: bold;
+}
+
+.estado-destacado-inactivo {
+    display: inline-block;
+    background-color: var(--color-fondo);
+    color: var(--color-texto-suave);
+    border: 1px solid var(--color-borde);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.acciones-fila-tabla {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.form-baja-producto {
+    display: inline-block;
+}
+
+/* ==========================================================================
    13. DISEÑO RESPONSIVO (Celulares y Tablets - HU01-T05 y RNF-01)
    ========================================================================== */
 
@@ -1710,8 +1971,13 @@ button:disabled {
     .barra-filtros,
     .barra-filtros-agenda,
     .barra-filtros-busqueda,
-    .barra-filtros-calendario {
+    .barra-filtros-calendario,
+    .barra-filtros-estadisticas {
         grid-template-columns: 1fr 1fr;
+    }
+
+    .metricas-grid {
+        grid-template-columns: 1fr;
     }
 
     .agenda-grid {
@@ -1757,7 +2023,8 @@ button:disabled {
     .barra-filtros,
     .barra-filtros-agenda,
     .barra-filtros-busqueda,
-    .barra-filtros-calendario {
+    .barra-filtros-calendario,
+    .barra-filtros-estadisticas {
         grid-template-columns: 1fr;
     }
 
