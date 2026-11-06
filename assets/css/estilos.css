@@ -648,6 +648,17 @@ button:disabled {
     box-shadow: 0 2px 6px rgba(44, 26, 17, 0.12);
 }
 
+.btn-like:disabled {
+    width: auto;
+    background-color: var(--color-blanco);
+    color: inherit;
+    cursor: pointer;
+}
+
+.btn-like:focus {
+    outline: none;
+}
+
 .btn-like:hover {
     transform: scale(1.06);
     border-color: var(--color-rojo);
