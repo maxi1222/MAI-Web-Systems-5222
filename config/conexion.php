@@ -1,17 +1,12 @@
 <?php
-// config/conexion.php
+date_default_timezone_set('America/Montevideo');
 
-if (!defined('CUPO_DIARIO')) {
-    define('CUPO_DIARIO', 20);
-}
 if (!defined('CUPO_DIARIO_MAXIMO')) {
-    define('CUPO_DIARIO_MAXIMO', CUPO_DIARIO);
+    define('CUPO_DIARIO_MAXIMO', 20);
 }
+
 if (!defined('TELEFONO_LOCAL')) {
     define('TELEFONO_LOCAL', '098 318 851');
-}
-if (!defined('TELEFONO')) {
-    define('TELEFONO', TELEFONO_LOCAL);
 }
 
 $servidor = "localhost";

@@ -1,9 +1,11 @@
 <?php
 // panel/acciones/producto_guardar.php
+// Alta y modificación de productos con validación de datos en servidor (HU09-T02 y HU09-T03)
 
 require_once '../../includes/auth.php';
 requerir_administrador();
 require_once '../../config/conexion.php';
+require_once '../../includes/funciones.php';
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     header("Location: ../productos.php");
@@ -33,30 +35,67 @@ if (isset($_POST["dias"]) && is_array($_POST["dias"])) {
     $dias_elegidos = explode(",", trim($_POST["dias_habilitados"]));
 }
 
+$dias_validos = obtener_dias_semana_catalogo();
 $dias_limpios = array();
 foreach ($dias_elegidos as $dia) {
-    $dia_trim = trim($dia);
-    if (!empty($dia_trim)) {
-        $dias_limpios[] = $dia_trim;
+    $dia_norm = normalizar_texto_dias(trim($dia));
+    if (in_array($dia_norm, $dias_validos, true) && !in_array($dia_norm, $dias_limpios, true)) {
+        $dias_limpios[] = $dia_norm;
     }
 }
 
 $errores = array();
 
-if (empty($nombre) || is_numeric($nombre)) {
+if (empty($nombre) || is_numeric($nombre) || strlen($nombre) < 3) {
     $errores[] = "El nombre del producto es obligatorio y debe ser en formato de texto.";
 }
 
 if (empty($precio) || !is_numeric($precio) || (float)$precio <= 0) {
-    $errores[] = "El precio del producto es obligatorio y debe ser un valor numérico válido.";
+    $errores[] = "El precio del producto es obligatorio y debe ser un valor numérico válido mayor a cero.";
 }
 
-if (empty($categoria)) {
-    $errores[] = "La categoría del producto es obligatoria.";
+if (empty($categoria) || !in_array($categoria, obtener_categorias_catalogo(), true)) {
+    $errores[] = "La categoría del producto es obligatoria y debe ser válida.";
 }
 
 if (empty($dias_limpios)) {
-    $errores[] = "Debe seleccionar al menos un día de la semana para la elaboración del producto.";
+    $errores[] = "Debe seleccionar al menos un día de la semana válido para la elaboración del producto.";
+}
+
+$imagen_url = isset($_POST["imagen_actual"]) ? trim($_POST["imagen_actual"]) : "";
+
+if (isset($_FILES["imagen"]) && $_FILES["imagen"]["error"] !== UPLOAD_ERR_NO_FILE) {
+    if ($_FILES["imagen"]["error"] !== UPLOAD_ERR_OK) {
+        $errores[] = "Error al subir el archivo de imagen.";
+    } else {
+        $peso_maximo = 5 * 1024 * 1024;
+        $nombre_original = basename($_FILES["imagen"]["name"]);
+        $extension = strtolower(pathinfo($nombre_original, PATHINFO_EXTENSION));
+        $extensiones_permitidas = array("jpg", "jpeg", "png", "webp", "gif");
+
+        if ($_FILES["imagen"]["size"] > $peso_maximo) {
+            $errores[] = "La imagen no puede superar los 5 MB de tamaño.";
+        } elseif (!in_array($extension, $extensiones_permitidas, true)) {
+            $errores[] = "Formato de imagen no válido. Solo se permiten archivos JPG, PNG, WEBP o GIF.";
+        } else {
+            $directorio_relativo = "assets/img/productos/";
+            $directorio_destino = "../../" . $directorio_relativo;
+
+            if (!is_dir($directorio_destino)) {
+                mkdir($directorio_destino, 0775, true);
+            }
+
+            $nombre_base = str_replace(" ", "_", pathinfo($nombre_original, PATHINFO_FILENAME));
+            $nombre_archivo = time() . "_" . $nombre_base . "." . $extension;
+            $ruta_completa = $directorio_destino . $nombre_archivo;
+
+            if (move_uploaded_file($_FILES["imagen"]["tmp_name"], $ruta_completa)) {
+                $imagen_url = $directorio_relativo . $nombre_archivo;
+            } else {
+                $errores[] = "No se pudo guardar la imagen en el servidor.";
+            }
+        }
+    }
 }
 
 if (!empty($errores)) {
@@ -71,33 +110,6 @@ if (!empty($errores)) {
 
 $dias_habilitados = implode(",", $dias_limpios);
 $precio_entero = (int)round((float)$precio);
-
-$imagen_url = isset($_POST["imagen_actual"]) ? trim($_POST["imagen_actual"]) : "";
-
-if (isset($_FILES["imagen"]) && $_FILES["imagen"]["error"] === UPLOAD_ERR_OK) {
-    $directorio_relativo = "assets/img/productos/";
-    $directorio_destino = "../../" . $directorio_relativo;
-
-    if (!is_dir($directorio_destino)) {
-        mkdir($directorio_destino, 0775, true);
-    }
-
-    $nombre_original = basename($_FILES["imagen"]["name"]);
-    $extension = strtolower(pathinfo($nombre_original, PATHINFO_EXTENSION));
-    $extensiones_permitidas = array("jpg", "jpeg", "png", "webp", "gif");
-
-    if (in_array($extension, $extensiones_permitidas)) {
-        $nombre_seguro = preg_replace('/[^a-zA-Z0-9_\.-]/', '_', pathinfo($nombre_original, PATHINFO_FILENAME));
-        $nombre_archivo = time() . "_" . $nombre_seguro . "." . $extension;
-        $ruta_completa = $directorio_destino . $nombre_archivo;
-
-        if (move_uploaded_file($_FILES["imagen"]["tmp_name"], $ruta_completa)) {
-            $imagen_url = $directorio_relativo . $nombre_archivo;
-        }
-    }
-} elseif (isset($_POST["imagen_url"]) && !empty(trim($_POST["imagen_url"]))) {
-    $imagen_url = trim($_POST["imagen_url"]);
-}
 
 if ($id_producto > 0 && empty($imagen_url)) {
     $sql_img = "SELECT imagen_url FROM productos WHERE id_producto = ?";

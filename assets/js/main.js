@@ -1,6 +1,6 @@
 // assets/js/main.js
 // Funciones JavaScript de interfaz para navegación móvil, validación de 24h en carrito,
-// modal de aviso (H.U-03) y validación de formulario de productos (HU09-T02)
+// modal de aviso (H.U-03), validación de formulario de productos (HU09-T02) y colores de estado (HU05-T03)
 
 document.addEventListener("DOMContentLoaded", function () {
     // 1. Menú desplegable en celulares (Encabezado público)
@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // Bloquear en el calendario de HTML las fechas pasadas y el día actual
         inputFechaDia.setAttribute("min", fechaMinimaTexto);
 
-        // Si ya hay un valor asignado (por ejemplo, fecha seleccionada a 1 mes), NO sobreescribirlo a menos que sea anterior a la mínima
+        // Si ya hay un valor asignado, conservarlo salvo que sea anterior a la fecha mínima
         if (inputFechaDia.value && inputFechaDia.value < fechaMinimaTexto) {
             inputFechaDia.value = fechaMinimaTexto;
         }
@@ -90,6 +90,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function mostrarErrorPedido(mensaje) {
         if (cajaErrorPedidoJS) {
             cajaErrorPedidoJS.textContent = mensaje;
+            cajaErrorPedidoJS.classList.remove("oculto");
             cajaErrorPedidoJS.style.display = "block";
         } else {
             alert(mensaje);
@@ -129,7 +130,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // 5. HU09-T02: Validación JS en navegador para el formulario de productos (panel/productos.php y panel/producto_editar.php)
-    // Validar que el nombre sea texto y el precio sea numérico antes de enviarlo
     var formProducto = document.getElementById("formProducto");
     var formEditarProducto = document.getElementById("formEditarProducto");
     var formularioGestionProd = formProducto ? formProducto : formEditarProducto;
@@ -179,6 +179,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function mostrarErrorProducto(mensaje) {
         if (cajaErrorProductoJS) {
             cajaErrorProductoJS.textContent = mensaje;
+            cajaErrorProductoJS.classList.remove("oculto");
             cajaErrorProductoJS.style.display = "block";
         } else {
             alert(mensaje);

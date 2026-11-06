@@ -1,36 +1,25 @@
 <?php
 // panel/acciones/producto_estado.php
+// Cambio de estado de stock (disponible) y de prioridad (destacado) por POST (HU08-T02 y HU10-T02)
 
 require_once '../../includes/auth.php';
 require_once '../../config/conexion.php';
 
-$id_producto = 0;
-if (isset($_POST["id_producto"]) && is_numeric($_POST["id_producto"])) {
-    $id_producto = (int)$_POST["id_producto"];
-} elseif (isset($_GET["id_producto"]) && is_numeric($_GET["id_producto"])) {
-    $id_producto = (int)$_GET["id_producto"];
-} elseif (isset($_POST["id"]) && is_numeric($_POST["id"])) {
-    $id_producto = (int)$_POST["id"];
-} elseif (isset($_GET["id"]) && is_numeric($_GET["id"])) {
-    $id_producto = (int)$_GET["id"];
+if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+    header("Location: ../productos.php");
+    exit();
 }
+
+$id_producto = (isset($_POST["id_producto"]) && is_numeric($_POST["id_producto"])) ? (int)$_POST["id_producto"] : 0;
 
 if ($id_producto <= 0) {
     header("Location: ../productos.php?error=id_invalido");
     exit();
 }
 
-// Esto te toca a vos iñaki: En la vista de productos (panel/productos.php o producto_editar.php),
-// maquetar el control visual (switch o botón) para alternar destacados enviando campo=destacado o accion=destacado.
-
-$es_cambio_destacado = false;
-if (isset($_POST["destacado"]) || isset($_GET["destacado"])) {
-    $es_cambio_destacado = true;
-} elseif ((isset($_POST["campo"]) && $_POST["campo"] === "destacado") || (isset($_GET["campo"]) && $_GET["campo"] === "destacado")) {
-    $es_cambio_destacado = true;
-} elseif ((isset($_POST["accion"]) && $_POST["accion"] === "destacado") || (isset($_GET["accion"]) && $_GET["accion"] === "destacado")) {
-    $es_cambio_destacado = true;
-}
+$es_cambio_destacado = isset($_POST["destacado"])
+    || (isset($_POST["campo"]) && $_POST["campo"] === "destacado")
+    || (isset($_POST["accion"]) && $_POST["accion"] === "destacado");
 
 if ($es_cambio_destacado) {
     // Restricción de seguridad: Solo el rol Administrador puede modificar 'destacado'
@@ -40,13 +29,9 @@ if ($es_cambio_destacado) {
         exit();
     }
 
-    $destacado = null;
     if (isset($_POST["destacado"])) {
         $destacado = ((int)$_POST["destacado"] === 1) ? 1 : 0;
-    } elseif (isset($_GET["destacado"])) {
-        $destacado = ((int)$_GET["destacado"] === 1) ? 1 : 0;
     } else {
-        // Si no se envió el valor explícito, consultamos el actual para alternarlo (toggle)
         $sql_actual = "SELECT destacado FROM productos WHERE id_producto = ?";
         $stmt_actual = $conexion->prepare($sql_actual);
         $stmt_actual->bind_param("i", $id_producto);
@@ -84,8 +69,6 @@ if ($es_cambio_destacado) {
 
 if (isset($_POST["disponible"])) {
     $disponible = ((int)$_POST["disponible"] === 1) ? 1 : 0;
-} elseif (isset($_GET["disponible"])) {
-    $disponible = ((int)$_GET["disponible"] === 1) ? 1 : 0;
 } else {
     $sql_actual = "SELECT disponible FROM productos WHERE id_producto = ?";
     $stmt_actual = $conexion->prepare($sql_actual);

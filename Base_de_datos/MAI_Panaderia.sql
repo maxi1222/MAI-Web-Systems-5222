@@ -8,7 +8,7 @@
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
-SET time_zone = "+00:00";
+SET time_zone = "-03:00";
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -52,18 +52,29 @@ CREATE TABLE productos (
   disponible tinyint(1) DEFAULT 1,
   destacado tinyint(1) DEFAULT 0,
   dias_habilitados varchar(150) DEFAULT 'Lunes,Martes,Miercoles,Jueves,Viernes,Sabado,Domingo',
-  activo tinyint(1) DEFAULT 1
+  activo tinyint(1) DEFAULT 1,
+  KEY idx_productos_catalogo (activo, disponible, destacado, categoria)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+INSERT INTO productos (`id_producto`, `nombre`, `descripcion`, `precio`, `categoria`, `imagen_url`, `disponible`, `destacado`, `dias_habilitados`, `activo`) VALUES
+(1, 'Croissant de Manteca Artesanal', 'Hojaldre francés laminado a mano con manteca extra, horneado cada mañana.', 95, 'Facturería', 'assets/img/productos/default_panaderia.svg', 1, 1, 'Lunes,Martes,Miercoles,Jueves,Viernes,Sabado,Domingo', 1),
+(2, 'Pan de Campo de Masa Madre', 'Hogaza rústica de fermentación lenta, corteza crocante y miga suave.', 210, 'Panadería', 'assets/img/productos/default_panaderia.svg', 1, 1, 'Lunes,Martes,Miercoles,Jueves,Viernes,Sabado', 1),
+(3, 'Tarta de Frutos Rojos y Crema', 'Base de masa sablée rellena con crema pastelera y frutas frescas.', 680, 'Tortas y Postres', 'assets/img/productos/default_panaderia.svg', 1, 1, 'Jueves,Viernes,Sabado,Domingo', 1),
+(4, 'Alfajores de Maicena Artesanales (6 u.)', 'Media docena de alfajores suaves rellenos con dulce de leche y coco.', 240, 'Pastelería', 'assets/img/productos/default_panaderia.svg', 0, 0, 'Lunes,Martes,Miercoles,Jueves,Viernes,Sabado', 1),
+(5, 'Docena de Bizcochos Surtidos', 'Selección tradicional recién salida del horno: margaritas, vigilantes y quesitos.', 320, 'Facturería', 'assets/img/productos/default_panaderia.svg', 1, 0, 'Lunes,Martes,Miercoles,Jueves,Viernes,Sabado,Domingo', 1),
+(6, 'Bandeja de Sándwiches de Miga (12 u.)', 'Docena de sándwiches triples en pan de miga extra tierno de jamón y queso.', 590, 'Salados y Sandwichería', 'assets/img/productos/default_panaderia.svg', 1, 0, 'Martes,Miercoles,Jueves,Viernes,Sabado,Domingo', 1);
 
 CREATE TABLE pedidos (
   id_pedido int(11) PRIMARY KEY AUTO_INCREMENT,
   nombre_cliente varchar(100) NOT NULL,
   telefono_cliente varchar(20) NOT NULL,
   fecha_retiro datetime NOT NULL,
+  total int(11) NOT NULL DEFAULT 0,
   estado enum('Pendiente','En preparación','Listo','Entregado') DEFAULT 'Pendiente',
   fecha_modificacion datetime DEFAULT NULL ON UPDATE current_timestamp(),
-  fecha_creacion datetime DEFAULT current_timestamp()
+  fecha_creacion datetime DEFAULT current_timestamp(),
+  KEY idx_pedidos_fecha (fecha_retiro),
+  KEY idx_pedidos_estado_fecha (estado, fecha_retiro)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE detalle_pedidos (

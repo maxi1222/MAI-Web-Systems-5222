@@ -14,48 +14,41 @@ $mensaje_error = "";
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $campo_email = isset($_POST["email"]) ? $_POST["email"] : "";
     $email = trim($campo_email);
-    $password = isset($_POST["password"]) ? $_POST["password"] : "";
+    $password = isset($_POST["password"]) ? trim($_POST["password"]) : "";
+
     if (empty($email) || empty($password)) {
         $mensaje_error = "Por favor, complete el correo electrónico y la contraseña.";
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $mensaje_error = "El formato del correo electrónico no es válido.";
     } else {
-        try {
-            $sql = "SELECT id_usuario, nombre, email, password, rol FROM usuarios WHERE email = ?";
-            $stmt = $conexion->prepare($sql);
-            $stmt->bind_param("s", $email);
-            $stmt->execute();
+        $sql = "SELECT id_usuario, nombre, email, password, rol FROM usuarios WHERE email = ?";
+        $stmt = $conexion->prepare($sql);
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
 
-            $resultado = $stmt->get_result();
-            $user = $resultado->fetch_assoc();
-            $stmt->close();
+        $resultado = $stmt->get_result();
+        $user = $resultado->fetch_assoc();
+        $stmt->close();
 
-            if ($user && password_verify($password, $user["password"])) {
-                if (password_needs_rehash($user["password"], PASSWORD_DEFAULT)) {
-                    $nuevo_hash = password_hash($password, PASSWORD_DEFAULT);
-                    $sql_rehash = "UPDATE usuarios SET password = ? WHERE id_usuario = ?";
-                    $stmt_rehash = $conexion->prepare($sql_rehash);
-                    $stmt_rehash->bind_param("si", $nuevo_hash, $user["id_usuario"]);
-                    $stmt_rehash->execute();
-                    $stmt_rehash->close();
-                }
-
-                session_regenerate_id(true);
-
-                $_SESSION["id_usuario"] = $user["id_usuario"];
-                $_SESSION["nombre"] = $user["nombre"];
-                $_SESSION["usuario"] = $user["nombre"];
-                $_SESSION["email"] = $user["email"];
-                $_SESSION["rol"] = $user["rol"];
-
-                header("Location: agenda.php");
-                exit();
-            } else {
-                $mensaje_error = "Correo o contraseña incorrectos.";
+        if ($user && password_verify($password, $user["password"])) {
+            if (password_needs_rehash($user["password"], PASSWORD_DEFAULT)) {
+                $nuevo_hash = password_hash($password, PASSWORD_DEFAULT);
+                $sql_rehash = "UPDATE usuarios SET password = ? WHERE id_usuario = ?";
+                $stmt_rehash = $conexion->prepare($sql_rehash);
+                $stmt_rehash->bind_param("si", $nuevo_hash, $user["id_usuario"]);
+                $stmt_rehash->execute();
+                $stmt_rehash->close();
             }
-        } catch (mysqli_sql_exception $e) {
-            error_log("Error en login: " . $e->getMessage());
-            $mensaje_error = "Ocurrió un error al iniciar sesión. Intente nuevamente más tarde.";
+
+            $_SESSION["id_usuario"] = $user["id_usuario"];
+            $_SESSION["nombre"] = $user["nombre"];
+            $_SESSION["email"] = $user["email"];
+            $_SESSION["rol"] = $user["rol"];
+
+            header("Location: agenda.php");
+            exit();
+        } else {
+            $mensaje_error = "Correo o contraseña incorrectos.";
         }
     }
 }

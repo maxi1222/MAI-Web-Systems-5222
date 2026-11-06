@@ -43,6 +43,9 @@ if ($periodo === 'semanal') {
     $etiqueta_periodo = "Período Mensual (" . date('m/Y', $ts_base) . ")";
 }
 
+$fecha_desde_dt = $fecha_desde . " 00:00:00";
+$fecha_hasta_dt = $fecha_hasta . " 23:59:59";
+
 // Contemplar períodos sin ventas inicializando valores en cero sin errores
 $total_recaudado = 0;
 $cantidad_encargos = 0;
@@ -51,19 +54,19 @@ $producto_mas_vendido_unidades = 0;
 $ranking_productos = array();
 
 // Consulta SQL de métricas y ventas filtrando únicamente pedidos concretados (WHERE p.estado = 'Entregado')
-// con funciones de agregación (COALESCE(SUM(dp.cantidad * dp.precio_unitario), 0), COUNT(DISTINCT p.id_pedido))
+// utilizando rango indexado sobre (estado, fecha_retiro)
 $sql_metricas = "SELECT 
                     COALESCE(SUM(dp.cantidad * dp.precio_unitario), 0) AS total_recaudado,
                     COUNT(DISTINCT p.id_pedido) AS total_pedidos
                  FROM pedidos p
                  LEFT JOIN detalle_pedidos dp ON p.id_pedido = dp.id_pedido
                  WHERE p.estado = 'Entregado'
-                   AND DATE(p.fecha_retiro) >= ?
-                   AND DATE(p.fecha_retiro) <= ?";
+                   AND p.fecha_retiro >= ?
+                   AND p.fecha_retiro <= ?";
 $stmt_met = $conexion->prepare($sql_metricas);
 
 if ($stmt_met) {
-    $stmt_met->bind_param("ss", $fecha_desde, $fecha_hasta);
+    $stmt_met->bind_param("ss", $fecha_desde_dt, $fecha_hasta_dt);
     $stmt_met->execute();
     $res_met = $stmt_met->get_result();
     if ($fila_met = $res_met->fetch_assoc()) {
@@ -82,8 +85,8 @@ $sql_top_producto = "SELECT
                      INNER JOIN pedidos ped ON dp.id_pedido = ped.id_pedido
                      INNER JOIN productos p ON dp.id_producto = p.id_producto
                      WHERE ped.estado = 'Entregado'
-                       AND DATE(ped.fecha_retiro) >= ?
-                       AND DATE(ped.fecha_retiro) <= ?
+                       AND ped.fecha_retiro >= ?
+                       AND ped.fecha_retiro <= ?
                      GROUP BY dp.id_producto, p.nombre
                      ORDER BY SUM(dp.cantidad) DESC
                      LIMIT 1";
@@ -91,7 +94,7 @@ $sql_top_producto = "SELECT
 $stmt_top = $conexion->prepare($sql_top_producto);
 
 if ($stmt_top) {
-    $stmt_top->bind_param("ss", $fecha_desde, $fecha_hasta);
+    $stmt_top->bind_param("ss", $fecha_desde_dt, $fecha_hasta_dt);
     $stmt_top->execute();
     $res_top = $stmt_top->get_result();
     if ($fila_top = $res_top->fetch_assoc()) {
@@ -112,15 +115,15 @@ $sql_ranking = "SELECT
                 INNER JOIN pedidos ped ON dp.id_pedido = ped.id_pedido
                 INNER JOIN productos p ON dp.id_producto = p.id_producto
                 WHERE ped.estado = 'Entregado'
-                  AND DATE(ped.fecha_retiro) >= ?
-                  AND DATE(ped.fecha_retiro) <= ?
+                  AND ped.fecha_retiro >= ?
+                  AND ped.fecha_retiro <= ?
                 GROUP BY p.id_producto, p.nombre, p.categoria
                 ORDER BY unidades_vendidas DESC, subtotal_recaudado DESC";
 
 $stmt_rank = $conexion->prepare($sql_ranking);
 
 if ($stmt_rank) {
-    $stmt_rank->bind_param("ss", $fecha_desde, $fecha_hasta);
+    $stmt_rank->bind_param("ss", $fecha_desde_dt, $fecha_hasta_dt);
     $stmt_rank->execute();
     $res_rank = $stmt_rank->get_result();
     while ($fila_rank = $res_rank->fetch_assoc()) {

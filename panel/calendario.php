@@ -1,7 +1,10 @@
 <?php
+// panel/calendario.php
+// Vista de encargos en calendario mensual de 7 columnas (H.U-06: HU06-T01, HU06-T02, HU06-T03 y HU06-T04)
 
 require_once '../includes/auth.php';
 require_once '../config/conexion.php';
+require_once '../includes/funciones.php';
 
 $ruta_base = "../";
 $pagina_panel = "calendario";
@@ -53,15 +56,15 @@ if ($mes_sig > 12) {
     $anio_sig++;
 }
 
-$fecha_inicio_mes = date('Y-m-01', $primer_dia_ts);
-$fecha_fin_mes = date('Y-m-t', $primer_dia_ts);
+$fecha_inicio_mes = date('Y-m-01', $primer_dia_ts) . ' 00:00:00';
+$fecha_fin_mes = date('Y-m-t', $primer_dia_ts) . ' 23:59:59';
 
 $pedidos_por_dia = array();
 $total_pedidos_mes = 0;
 
 $sql = "SELECT id_pedido, nombre_cliente, fecha_retiro, estado
         FROM pedidos
-        WHERE DATE(fecha_retiro) >= ? AND DATE(fecha_retiro) <= ?
+        WHERE fecha_retiro >= ? AND fecha_retiro <= ?
         ORDER BY fecha_retiro ASC";
 $stmt = $conexion->prepare($sql);
 
@@ -84,12 +87,13 @@ if ($stmt) {
 $conteo_diario = array();
 $sql_agg = "SELECT DAY(fecha_retiro) AS dia, COUNT(*) AS total
             FROM pedidos
-            WHERE MONTH(fecha_retiro) = ? AND YEAR(fecha_retiro) = ?
+            WHERE fecha_retiro >= ? AND fecha_retiro <= ?
+              AND MONTH(fecha_retiro) = ? AND YEAR(fecha_retiro) = ?
             GROUP BY DAY(fecha_retiro)";
 $stmt_agg = $conexion->prepare($sql_agg);
 
 if ($stmt_agg) {
-    $stmt_agg->bind_param("ii", $mes_seleccionado, $anio_seleccionado);
+    $stmt_agg->bind_param("ssii", $fecha_inicio_mes, $fecha_fin_mes, $mes_seleccionado, $anio_seleccionado);
     $stmt_agg->execute();
     $resultado_agg = $stmt_agg->get_result();
 
@@ -177,7 +181,7 @@ require_once '../includes/header_panel.php';
                 $fecha_celda = sprintf('%04d-%02d-%02d', $anio_seleccionado, $mes_seleccionado, $dia);
                 $es_hoy = ($fecha_celda === $fecha_hoy_str);
                 $pedidos_del_dia = isset($pedidos_por_dia[$dia]) ? $pedidos_por_dia[$dia] : array();
-                $cantidad_dia = count($pedidos_del_dia);
+                $cantidad_dia = isset($conteo_diario[$dia]) ? $conteo_diario[$dia] : count($pedidos_del_dia);
 
                 $clases_celda = "calendario-celda";
                 if ($es_hoy) {
@@ -208,14 +212,7 @@ require_once '../includes/header_panel.php';
                                     if ($mostrados >= 3) {
                                         break;
                                     }
-                                    $clase_est = "estado-pendiente";
-                                    if ($ped_mini['estado'] === 'En preparación') {
-                                        $clase_est = "estado-preparacion";
-                                    } elseif ($ped_mini['estado'] === 'Listo') {
-                                        $clase_est = "estado-listo";
-                                    } elseif ($ped_mini['estado'] === 'Entregado') {
-                                        $clase_est = "estado-entregado";
-                                    }
+                                    $clase_est = obtener_clase_estado($ped_mini['estado']);
                                     $hora_mini = date('H:i', strtotime($ped_mini['fecha_retiro']));
                                     $mostrados++;
                                 ?>

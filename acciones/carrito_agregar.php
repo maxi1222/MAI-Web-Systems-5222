@@ -1,11 +1,13 @@
 <?php
+// acciones/carrito_agregar.php
+// Gestión de carrito de compras en sesión PHP (H.U-02 / HU02-T01)
 
 session_start();
-require_once __DIR__ . '/../config/conexion.php';
+require_once '../config/conexion.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $id_producto = isset($_POST['id_producto']) ? (int)$_POST['id_producto'] : 0;
-    $cantidad = isset($_POST['cantidad']) ? (int)$_POST['cantidad'] : 1;
+    $id_producto = (isset($_POST['id_producto']) && is_numeric($_POST['id_producto'])) ? (int)$_POST['id_producto'] : 0;
+    $cantidad = (isset($_POST['cantidad']) && is_numeric($_POST['cantidad'])) ? (int)$_POST['cantidad'] : 1;
     if ($cantidad <= 0) {
         $cantidad = 1;
     }
@@ -17,23 +19,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($id_producto > 0) {
         $sql = "SELECT id_producto, disponible FROM productos WHERE id_producto = ? AND (activo = 1 OR activo IS NULL)";
-        $stmt = mysqli_prepare($conexion, $sql);
+        $stmt = $conexion->prepare($sql);
         if ($stmt) {
-            mysqli_stmt_bind_param($stmt, "i", $id_producto);
-            mysqli_stmt_execute($stmt);
-            $resultado = mysqli_stmt_get_result($stmt);
-            $producto = mysqli_fetch_assoc($resultado);
-            mysqli_stmt_close($stmt);
+            $stmt->bind_param("i", $id_producto);
+            $stmt->execute();
+            $resultado = $stmt->get_result();
+            $producto = $resultado->fetch_assoc();
+            $stmt->close();
 
             // Si el producto existe, está activo y no está agotado (disponible == 1)
             if ($producto && (int)$producto['disponible'] === 1) {
-                if (!isset($_SESSION['carrito']) || !is_array($_SESSION['carrito'])) {
-                    $_SESSION['carrito'] = [];
+                if (!isset($_SESSION['carrito'])) {
+                    $_SESSION['carrito'] = array();
                 }
-                
-                // Indexar SIEMPRE por el ID entero del producto
+
                 if (isset($_SESSION['carrito'][$id_producto])) {
-                    $_SESSION['carrito'][$id_producto] += $cantidad;
+                    $_SESSION['carrito'][$id_producto] = $_SESSION['carrito'][$id_producto] + $cantidad;
                 } else {
                     $_SESSION['carrito'][$id_producto] = $cantidad;
                 }

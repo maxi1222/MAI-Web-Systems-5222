@@ -1,6 +1,6 @@
 <?php
 // index.php
-// Página de inicio con portada principal, productos destacados (H.U-10 / HU10-T01) y reacciones de Likes con Firebase
+// Página de inicio con portada principal, productos destacados (H.U-10: HU10-T01 y HU10-T03) y reacciones de Likes con Firebase
 
 require_once 'config/conexion.php';
 require_once 'includes/funciones.php';
@@ -11,63 +11,20 @@ $titulo_pagina = "Panadería La Ideal - Artesanal y Tradicional";
 
 $productos_destacados = array();
 
-// Ejecutamos la consulta solicitada en los requerimientos (destacado = 1 AND activo = 1)
-$sql_destacados = "SELECT id_producto, nombre, descripcion, precio, categoria, imagen_url, disponible, destacado, dias_habilitados FROM productos WHERE destacado = 1 AND activo = 1 ORDER BY id_producto DESC";
+// HU10-T03: Consulta SQL preparada para obtener los productos marcados como destacados y activos
+$sql_destacados = "SELECT id_producto, nombre, descripcion, precio, categoria, imagen_url, disponible, destacado, dias_habilitados
+                   FROM productos
+                   WHERE destacado = 1 AND (activo = 1 OR activo IS NULL)
+                   ORDER BY id_producto DESC";
+$stmt_dest = $conexion->prepare($sql_destacados);
 
-$resultado_destacados = false;
-try {
-    $resultado_destacados = $conexion->query($sql_destacados);
-} catch (Exception $e) {
-    $resultado_destacados = false;
-}
-
-// Fallback por si la base de datos local aún no aplicó la migración del campo 'activo'
-if (!$resultado_destacados) {
-    $sql_fallback = "SELECT id_producto, nombre, descripcion, precio, categoria, imagen_url, disponible, destacado, dias_habilitados FROM productos WHERE destacado = 1 ORDER BY id_producto DESC";
-    $resultado_destacados = $conexion->query($sql_fallback);
-}
-
-if ($resultado_destacados && $resultado_destacados->num_rows > 0) {
+if ($stmt_dest) {
+    $stmt_dest->execute();
+    $resultado_destacados = $stmt_dest->get_result();
     while ($fila = $resultado_destacados->fetch_assoc()) {
         $productos_destacados[] = $fila;
     }
-} else {
-    // Si la base de datos está recién inicializada y vacía, se provee respaldo con destacados de muestra
-    $productos_destacados = array(
-        array(
-            "id_producto" => 1,
-            "nombre" => "Croissant de Manteca Artesanal",
-            "descripcion" => "Hojaldre francés laminado a mano con manteca extra, horneado cada mañana.",
-            "precio" => 95,
-            "categoria" => "Facturería",
-            "imagen_url" => "assets/img/productos/default_panaderia.svg",
-            "disponible" => 1,
-            "destacado" => 1,
-            "dias_habilitados" => "Lunes,Martes,Miercoles,Jueves,Viernes,Sabado,Domingo"
-        ),
-        array(
-            "id_producto" => 2,
-            "nombre" => "Pan de Campo de Masa Madre",
-            "descripcion" => "Hogaza rústica de fermentación lenta, corteza crocante y miga suave.",
-            "precio" => 210,
-            "categoria" => "Panadería",
-            "imagen_url" => "assets/img/productos/default_panaderia.svg",
-            "disponible" => 1,
-            "destacado" => 1,
-            "dias_habilitados" => "Lunes,Martes,Miercoles,Jueves,Viernes,Sabado"
-        ),
-        array(
-            "id_producto" => 3,
-            "nombre" => "Tarta de Frutos Rojos y Crema",
-            "descripcion" => "Base de masa sablée rellena con crema pastelera y frutas frescas.",
-            "precio" => 680,
-            "categoria" => "Tortas y Postres",
-            "imagen_url" => "assets/img/productos/default_panaderia.svg",
-            "disponible" => 1,
-            "destacado" => 1,
-            "dias_habilitados" => "Jueves,Viernes,Sabado,Domingo"
-        )
-    );
+    $stmt_dest->close();
 }
 
 require_once 'includes/header_publico.php';

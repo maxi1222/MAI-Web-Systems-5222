@@ -1,7 +1,10 @@
 <?php
+// panel/pedidos_buscar.php
+// Buscador y filtrado de pedidos (H.U-07: HU07-T01, HU07-T02 y HU07-T03)
 
 require_once '../includes/auth.php';
 require_once '../config/conexion.php';
+require_once '../includes/funciones.php';
 
 $ruta_base = "../";
 $pagina_panel = "buscar";
@@ -11,39 +14,30 @@ $fecha_desde = isset($_GET['fecha_desde']) ? trim($_GET['fecha_desde']) : '';
 $fecha_hasta = isset($_GET['fecha_hasta']) ? trim($_GET['fecha_hasta']) : '';
 $nombre_cliente = isset($_GET['nombre_cliente']) ? trim($_GET['nombre_cliente']) : '';
 
+$fecha_desde_dt = !empty($fecha_desde) ? ($fecha_desde . " 00:00:00") : "";
+$fecha_hasta_dt = !empty($fecha_hasta) ? ($fecha_hasta . " 23:59:59") : "";
+$nombre_like = "%" . $nombre_cliente . "%";
+
 $sql = "SELECT id_pedido, nombre_cliente, telefono_cliente, fecha_retiro, estado, fecha_creacion
         FROM pedidos
-        WHERE 1=1";
-$tipos = "";
-$parametros = array();
-
-if (!empty($fecha_desde)) {
-    $sql .= " AND DATE(fecha_retiro) >= ?";
-    $tipos .= "s";
-    $parametros[] = $fecha_desde;
-}
-
-if (!empty($fecha_hasta)) {
-    $sql .= " AND DATE(fecha_retiro) <= ?";
-    $tipos .= "s";
-    $parametros[] = $fecha_hasta;
-}
-
-if (!empty($nombre_cliente)) {
-    $sql .= " AND nombre_cliente LIKE ?";
-    $tipos .= "s";
-    $parametros[] = "%" . $nombre_cliente . "%";
-}
-
-$sql .= " ORDER BY fecha_retiro DESC, id_pedido DESC";
+        WHERE (? = '' OR fecha_retiro >= ?)
+          AND (? = '' OR fecha_retiro <= ?)
+          AND (? = '' OR nombre_cliente LIKE ?)
+        ORDER BY fecha_retiro DESC, id_pedido DESC";
 
 $pedidos_encontrados = array();
 $stmt = $conexion->prepare($sql);
 
 if ($stmt) {
-    if (!empty($parametros)) {
-        $stmt->bind_param($tipos, ...$parametros);
-    }
+    $stmt->bind_param(
+        "ssssss",
+        $fecha_desde,
+        $fecha_desde_dt,
+        $fecha_hasta,
+        $fecha_hasta_dt,
+        $nombre_cliente,
+        $nombre_like
+    );
     $stmt->execute();
     $resultado = $stmt->get_result();
 
@@ -66,7 +60,7 @@ if ($stmt) {
             while ($item = $res_det->fetch_assoc()) {
                 $cant = (int)$item['cantidad'];
                 $precio = (int)$item['precio_unitario'];
-                $monto_total += ($cant * $precio); // <-- CORREGIDO AQUÍ EL OPERADOR DE MULTIPLICACIÓN
+                $monto_total = $monto_total + ($cant * $precio);
                 $resumen_items[] = $cant . "x " . $item['nombre'];
             }
         }
@@ -159,16 +153,7 @@ require_once '../includes/header_panel.php';
                     </thead>
                     <tbody>
                         <?php foreach ($pedidos_encontrados as $ped): ?>
-                            <?php
-                            $clase_estado = "estado-pendiente";
-                            if ($ped['estado'] === 'En preparación') {
-                                $clase_estado = "estado-preparacion";
-                            } elseif ($ped['estado'] === 'Listo') {
-                                $clase_estado = "estado-listo";
-                            } elseif ($ped['estado'] === 'Entregado') {
-                                $clase_estado = "estado-entregado";
-                            }
-                            ?>
+                            <?php $clase_estado = obtener_clase_estado($ped['estado']); ?>
                             <tr class="<?php echo $clase_estado; ?>">
                                 <td><strong>#<?php echo (int)$ped['id_pedido']; ?></strong></td>
                                 <td><?php echo htmlspecialchars($ped['nombre_cliente'], ENT_QUOTES, 'UTF-8'); ?></td>

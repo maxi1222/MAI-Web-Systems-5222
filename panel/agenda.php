@@ -10,6 +10,18 @@ $ruta_base = "../";
 $pagina_panel = "agenda";
 $titulo_pagina = "Agenda de Pedidos - Panel MAI Panadería";
 
+$mensaje_exito = "";
+if (isset($_SESSION["mensaje_exito"])) {
+    $mensaje_exito = $_SESSION["mensaje_exito"];
+    unset($_SESSION["mensaje_exito"]);
+}
+
+$mensaje_error = "";
+if (isset($_SESSION["mensaje_error"])) {
+    $mensaje_error = $_SESSION["mensaje_error"];
+    unset($_SESSION["mensaje_error"]);
+}
+
 $vista = isset($_GET['vista']) ? trim($_GET['vista']) : 'diaria';
 $fecha_base = (isset($_GET['fecha']) && !empty(trim($_GET['fecha']))) ? trim($_GET['fecha']) : date('Y-m-d');
 $filtro_estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
@@ -34,37 +46,26 @@ if ($vista === 'diaria') {
     $fecha_hasta = date('Y-m-t', $ts_base);
 }
 
+$fecha_desde_dt = $fecha_desde . ' 00:00:00';
+$fecha_hasta_dt = $fecha_hasta . ' 23:59:59';
+
 // HU04-T02: Consulta SQL preparada para filtrar pedidos por rango de fechas y ordenarlos cronológicamente
-$sql = "SELECT id_pedido, nombre_cliente, telefono_cliente, fecha_retiro, estado, fecha_modificacion, fecha_creacion FROM pedidos WHERE 1=1";
-$tipos = "";
-$params = array();
-if ($vista !== 'todos'){
-    $sql .= " AND DATE(fecha_retiro) >= ? AND DATE(fecha_retiro) <= ?";
-    $tipos .= "ss";
-    $params[] = $fecha_desde;
-    $params[] = $fecha_hasta;
-}
-
-if (!empty($filtro_estado)) {
-    $sql .= " AND estado = ?";
-    $tipos .= "s";
-    $params[] = $filtro_estado;
-}
-
-$sql .= " ORDER BY fecha_retiro ASC, id_pedido ASC";
+$sql = "SELECT id_pedido, nombre_cliente, telefono_cliente, fecha_retiro, estado, fecha_modificacion, fecha_creacion
+        FROM pedidos
+        WHERE (? = 'todos' OR (fecha_retiro >= ? AND fecha_retiro <= ?))
+          AND (? = '' OR estado = ?)
+        ORDER BY fecha_retiro ASC, id_pedido ASC";
 
 $pedidos_agenda = array();
 $stmt = $conexion->prepare($sql);
 
 if ($stmt) {
-    if (!empty($params)) {
-        $stmt->bind_param($tipos, ...$params);
-    }
+    $stmt->bind_param("sssss", $vista, $fecha_desde_dt, $fecha_hasta_dt, $filtro_estado, $filtro_estado);
     $stmt->execute();
     $res = $stmt->get_result();
 
-    // HU04-T03: Consulta SQL para obtener el detalle de productos y cantidades de cada pedido
-    $sql_det = "SELECT dp.cantidad, dp.precio_unitario, p.nombre, p.categoria 
+    // HU04-T03: Consulta SQL preparada una sola vez para obtener el detalle de productos de cada pedido
+    $sql_det = "SELECT dp.cantidad, dp.precio_unitario, p.nombre, p.categoria
                 FROM detalle_pedidos dp
                 INNER JOIN productos p ON dp.id_producto = p.id_producto
                 WHERE dp.id_pedido = ?";
@@ -81,7 +82,7 @@ if ($stmt) {
             $res_d = $stmt_det->get_result();
 
             while ($d = $res_d->fetch_assoc()) {
-                $subtotal = (float)$d['precio_unitario'] * (int)$d['cantidad'];
+                $subtotal = (int)$d['precio_unitario'] * (int)$d['cantidad'];
                 $total_ped = $total_ped + $subtotal;
                 $items_ped[] = $d;
             }
@@ -89,8 +90,6 @@ if ($stmt) {
 
         $ped['items'] = $items_ped;
         $ped['total'] = $total_ped;
-
-        $hora_num = (int)date('H', strtotime($ped['fecha_retiro']));
         $ped['turno'] = determinar_turno($ped['fecha_retiro']);
 
         $pedidos_agenda[] = $ped;
@@ -110,6 +109,14 @@ require_once '../includes/header_panel.php';
         <h2>Agenda de Pedidos de Cocina y Mostrador</h2>
         <p>Visualizá los encargos ordenados por horario de retiro y turno de elaboración (Diaria, Semanal o Mensual).</p>
     </div>
+
+    <?php if (!empty($mensaje_exito)): ?>
+        <div class="alerta alerta-exito"><?php echo htmlspecialchars($mensaje_exito, ENT_QUOTES, 'UTF-8'); ?></div>
+    <?php endif; ?>
+
+    <?php if (!empty($mensaje_error)): ?>
+        <div class="alerta alerta-error"><?php echo htmlspecialchars($mensaje_error, ENT_QUOTES, 'UTF-8'); ?></div>
+    <?php endif; ?>
 
     <!-- HU04-T01: Selector de vista (Diaria, Semanal o Mensual) y filtro de fecha -->
     <form action="agenda.php" method="GET" class="barra-filtros-agenda">
@@ -174,14 +181,7 @@ require_once '../includes/header_panel.php';
             <?php foreach ($pedidos_agenda as $ped): ?>
                 <?php
                 // Determinar la clase de color según el estado del pedido (HU05-T03)
-                $clase_estado = "estado-pendiente";
-                if ($ped['estado'] === 'En preparación') {
-                    $clase_estado = "estado-preparacion";
-                } elseif ($ped['estado'] === 'Listo') {
-                    $clase_estado = "estado-listo";
-                } elseif ($ped['estado'] === 'Entregado') {
-                    $clase_estado = "estado-entregado";
-                }
+                $clase_estado = obtener_clase_estado($ped['estado']);
                 ?>
                 <article class="ficha-pedido ficha-<?php echo $clase_estado; ?>">
                     <div class="ficha-pedido-cabecera">
@@ -227,6 +227,7 @@ require_once '../includes/header_panel.php';
                         <input type="hidden" name="id_pedido" value="<?php echo (int)$ped['id_pedido']; ?>">
                         <input type="hidden" name="vista_actual" value="<?php echo htmlspecialchars($vista, ENT_QUOTES, 'UTF-8'); ?>">
                         <input type="hidden" name="fecha_actual" value="<?php echo htmlspecialchars($fecha_base, ENT_QUOTES, 'UTF-8'); ?>">
+                        <input type="hidden" name="estado_actual" value="<?php echo htmlspecialchars($filtro_estado, ENT_QUOTES, 'UTF-8'); ?>">
 
                         <label for="select_estado_<?php echo (int)$ped['id_pedido']; ?>" class="label-estado-pedido">
                             Cambiar estado:

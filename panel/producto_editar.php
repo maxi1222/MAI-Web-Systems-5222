@@ -5,6 +5,7 @@
 require_once '../includes/auth.php';
 requerir_administrador();
 require_once '../config/conexion.php';
+require_once '../includes/funciones.php';
 
 $ruta_base = "../";
 $pagina_panel = "productos";
@@ -55,7 +56,12 @@ while ($fila = $res_todos->fetch_assoc()) {
 }
 $stmt_todos->close();
 
-$dias_semana_lista = array("Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo");
+$categorias_base = obtener_categorias_catalogo();
+if (!in_array($producto["categoria"], $categorias_base) && !empty($producto["categoria"])) {
+    $categorias_base[] = $producto["categoria"];
+}
+
+$dias_semana_lista = obtener_dias_semana_catalogo();
 $dias_producto = array_map('trim', explode(",", (string)$producto["dias_habilitados"]));
 
 require_once '../includes/header_panel.php';
@@ -84,7 +90,7 @@ require_once '../includes/header_panel.php';
         <h3>Datos del Producto</h3>
 
         <!-- Contenedor para alertas de validación de JavaScript (HU09-T02) -->
-        <div id="errorValidacionProductoJS" class="alerta alerta-error" style="display: none;"></div>
+        <div id="errorValidacionProductoJS" class="alerta alerta-error oculto"></div>
 
         <form action="acciones/producto_guardar.php" method="POST" enctype="multipart/form-data" class="formulario-producto" id="formEditarProducto">
             <input type="hidden" name="id_producto" value="<?php echo (int)$producto["id_producto"]; ?>">
@@ -121,18 +127,6 @@ require_once '../includes/header_panel.php';
             <div class="fila-formulario-doble">
                 <div class="grupo-formulario">
                     <label for="categoria">Categoría:</label>
-                    <?php
-                    $categorias_base = array(
-                        "Panadería",
-                        "Facturería",
-                        "Tortas y Postres",
-                        "Pastelería",
-                        "Salados y Sandwichería"
-                    );
-                    if (!in_array($producto["categoria"], $categorias_base) && !empty($producto["categoria"])) {
-                        $categorias_base[] = $producto["categoria"];
-                    }
-                    ?>
                     <select id="categoria" name="categoria" required>
                         <?php foreach ($categorias_base as $cat): ?>
                             <option value="<?php echo htmlspecialchars($cat, ENT_QUOTES, 'UTF-8'); ?>" <?php echo ($producto["categoria"] === $cat) ? 'selected' : ''; ?>>
@@ -209,90 +203,7 @@ require_once '../includes/header_panel.php';
         </form>
     </section>
 
-    <section class="seccion-listado">
-        <h3>Listado de Productos</h3>
-        <?php if (empty($productos)): ?>
-            <p class="texto-vacio-panel">No hay productos cargados en el catálogo todavía.</p>
-        <?php else: ?>
-            <div class="tabla-responsive">
-                <table class="tabla-productos">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Imagen</th>
-                            <th>Nombre</th>
-                            <th>Categoría</th>
-                            <th>Precio</th>
-                            <th>Días Habilitados</th>
-                            <th>Destacado</th>
-                            <th>Estado (Stock)</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($productos as $prod): ?>
-                            <tr>
-                                <td>#<?php echo (int)$prod["id_producto"]; ?></td>
-                                <td>
-                                    <?php if (!empty($prod["imagen_url"])): ?>
-                                        <img src="../<?php echo htmlspecialchars($prod["imagen_url"], ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($prod["nombre"], ENT_QUOTES, 'UTF-8'); ?>" class="miniatura-tabla" width="60">
-                                    <?php else: ?>
-                                        <span class="sin-imagen-texto">Sin imagen</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td><strong><?php echo htmlspecialchars($prod["nombre"], ENT_QUOTES, 'UTF-8'); ?></strong></td>
-                                <td><span class="tarjeta-categoria"><?php echo htmlspecialchars($prod["categoria"], ENT_QUOTES, 'UTF-8'); ?></span></td>
-                                <td><strong>$<?php echo (int)$prod["precio"]; ?></strong></td>
-                                <td class="celda-dias"><?php echo htmlspecialchars(str_replace(",", ", ", $prod["dias_habilitados"]), ENT_QUOTES, 'UTF-8'); ?></td>
-                                <td>
-                                    <form action="acciones/producto_estado.php" method="POST" class="form-estado-stock">
-                                        <input type="hidden" name="id_producto" value="<?php echo (int)$prod["id_producto"]; ?>">
-                                        <input type="hidden" name="accion" value="destacado">
-                                        <input type="hidden" name="destacado" value="<?php echo ((int)$prod["destacado"] === 1) ? 0 : 1; ?>">
-                                        <label class="switch-stock">
-                                            <input
-                                                type="checkbox"
-                                                onchange="this.form.submit()"
-                                                <?php echo ((int)$prod["destacado"] === 1) ? 'checked' : ''; ?>
-                                            >
-                                            <span class="<?php echo ((int)$prod["destacado"] === 1) ? 'estado-destacado-activo' : 'estado-destacado-inactivo'; ?>">
-                                                <?php echo ((int)$prod["destacado"] === 1) ? '★ Destacado' : 'Normal'; ?>
-                                            </span>
-                                        </label>
-                                    </form>
-                                </td>
-                                <td>
-                                    <form action="acciones/producto_estado.php" method="POST" class="form-estado-stock">
-                                        <input type="hidden" name="id_producto" value="<?php echo (int)$prod["id_producto"]; ?>">
-                                        <input type="hidden" name="disponible" value="<?php echo ((int)$prod["disponible"] === 1) ? 0 : 1; ?>">
-                                        <label class="switch-stock">
-                                            <input
-                                                type="checkbox"
-                                                onchange="this.form.submit()"
-                                                <?php echo ((int)$prod["disponible"] === 1) ? 'checked' : ''; ?>
-                                            >
-                                            <span class="<?php echo ((int)$prod["disponible"] === 1) ? 'estado-disponible' : 'etiqueta-agotado'; ?>">
-                                                <?php echo ((int)$prod["disponible"] === 1) ? 'Disponible' : 'Agotado'; ?>
-                                            </span>
-                                        </label>
-                                    </form>
-                                </td>
-                                <td>
-                                    <div class="acciones-fila-tabla">
-                                        <a href="producto_editar.php?id=<?php echo (int)$prod["id_producto"]; ?>" class="btn btn-secundario btn-pequeno">Editar</a>
-                                        <form action="acciones/producto_baja.php" method="POST" class="form-baja-producto" onsubmit="return confirm('¿Seguro que deseas dar de baja este producto?');">
-                                            <input type="hidden" name="id_producto" value="<?php echo (int)$prod["id_producto"]; ?>">
-                                            <button type="submit" class="btn-quitar-item" onclick="return confirm('¿Seguro que deseas dar de baja este producto?');">Dar de baja</button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-        <?php endif; ?>
-    </section>
+    <?php require_once '../includes/tabla_productos_panel.php'; ?>
 </div>
 
 <?php

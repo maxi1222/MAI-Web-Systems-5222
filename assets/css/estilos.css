@@ -70,6 +70,10 @@ a {
     padding: 0 20px;
 }
 
+.oculto {
+    display: none;
+}
+
 /* ==========================================================================
    2. BOTONES Y ALERTAS GENERALES
    ========================================================================== */
@@ -317,6 +321,14 @@ button:disabled {
     color: var(--color-blanco);
 }
 
+.user-role-badge.rol-admin {
+    background-color: var(--color-naranja);
+}
+
+.user-role-badge.rol-empleado {
+    background-color: #6D4C41;
+}
+
 .btn-logout-panel {
     background-color: var(--color-rojo);
     color: var(--color-blanco);
@@ -504,17 +516,26 @@ button:disabled {
     max-width: 700px;
 }
 
-/* HU01-T03: Barra de filtros */
-.barra-filtros {
+/* Base compartida para todas las barras de filtro del sistema */
+.barra-filtros,
+.barra-filtros-agenda,
+.barra-filtros-busqueda,
+.barra-filtros-calendario,
+.barra-filtros-estadisticas {
     background-color: var(--color-blanco);
     border: 1px solid var(--color-borde);
     border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 28px;
+    padding: 18px 20px;
     display: grid;
-    grid-template-columns: 2fr 1.5fr 1.5fr auto;
     gap: 16px;
     align-items: end;
+}
+
+/* HU01-T03: Barra de filtros del catálogo */
+.barra-filtros {
+    padding: 20px;
+    margin-bottom: 28px;
+    grid-template-columns: 2fr 1.5fr 1.5fr auto;
 }
 
 .filtro-item {
@@ -599,11 +620,16 @@ button:disabled {
 
 /* HU08-T03: Etiqueta roja "Agotado" */
 .etiqueta-agotado {
+    display: inline-block;
     background-color: var(--color-rojo);
     color: var(--color-blanco);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: bold;
 }
 
-/* Botón de corazón para Likes (Firebase) */
+/* Interfaz de Likes (Firebase): Botón de corazón (♡ / ♥) y contador */
 .btn-like {
     position: absolute;
     top: 10px;
@@ -618,12 +644,34 @@ button:disabled {
     cursor: pointer;
     font-size: 0.85rem;
     font-weight: 600;
+    transition: transform 0.15s ease, background-color 0.2s ease, border-color 0.2s ease;
+    box-shadow: 0 2px 6px rgba(44, 26, 17, 0.12);
+}
+
+.btn-like:hover {
+    transform: scale(1.06);
+    border-color: var(--color-rojo);
 }
 
 .btn-like.like-activo {
     background-color: var(--color-rojo-fondo);
     color: var(--color-rojo);
     border-color: var(--color-rojo);
+}
+
+.corazon-icono {
+    font-size: 1rem;
+    line-height: 1;
+    color: var(--color-rojo);
+}
+
+.btn-like.like-activo .corazon-icono {
+    color: var(--color-rojo);
+}
+
+.like-contador {
+    font-size: 0.82rem;
+    font-weight: 700;
 }
 
 .tarjeta-cuerpo {
@@ -1160,6 +1208,11 @@ button:disabled {
     color: var(--color-texto-suave);
 }
 
+.sin-permisos-texto {
+    font-size: 0.85rem;
+    color: var(--color-texto-suave);
+}
+
 .celda-dias {
     font-size: 0.85rem;
     color: var(--color-texto-suave);
@@ -1225,30 +1278,12 @@ button:disabled {
     font-weight: bold;
 }
 
-/* HU08-T03: Etiqueta roja "Agotado" tanto en tabla del panel como en catálogo público */
-.switch-stock .etiqueta-agotado {
-    display: inline-block;
-    background-color: var(--color-rojo);
-    color: var(--color-blanco);
-    padding: 4px 10px;
-    border-radius: 999px;
-    font-size: 0.78rem;
-    font-weight: bold;
-}
-
 /* ==========================================================================
    12. AGENDA DE PEDIDOS DE COCINA Y FICHAS (H.U-04 / HU04-T01)
    ========================================================================== */
 .barra-filtros-agenda {
-    background-color: var(--color-blanco);
-    border: 1px solid var(--color-borde);
-    border-radius: 12px;
-    padding: 18px 20px;
     margin-bottom: 18px;
-    display: grid;
     grid-template-columns: 1.2fr 1.2fr 1.2fr auto;
-    gap: 16px;
-    align-items: end;
 }
 
 .resumen-rango-agenda {
@@ -1476,15 +1511,8 @@ button:disabled {
    12c. BÚSQUEDA Y FILTRADO DE PEDIDOS (H.U-07 / HU07-T01)
    ========================================================================== */
 .barra-filtros-busqueda {
-    background-color: var(--color-blanco);
-    border: 1px solid var(--color-borde);
-    border-radius: 12px;
-    padding: 18px 20px;
     margin-bottom: 24px;
-    display: grid;
     grid-template-columns: 1fr 1fr 1.4fr auto;
-    gap: 16px;
-    align-items: end;
 }
 
 .cabecera-tabla-resultados {
@@ -1513,15 +1541,8 @@ button:disabled {
    12d. CALENDARIO MENSUAL DE 7 COLUMNAS (H.U-06 / HU06-T01 y HU06-T03)
    ========================================================================== */
 .barra-filtros-calendario {
-    background-color: var(--color-blanco);
-    border: 1px solid var(--color-borde);
-    border-radius: 12px;
-    padding: 18px 20px;
     margin-bottom: 18px;
-    display: grid;
     grid-template-columns: 1.5fr 1fr auto;
-    gap: 16px;
-    align-items: end;
 }
 
 .calendario-navegacion-mes {
@@ -1701,15 +1722,8 @@ button:disabled {
    12e. ESTADÍSTICAS DE VENTAS Y TARJETAS DE MÉTRICAS (H.U-11 / HU11-T01)
    ========================================================================== */
 .barra-filtros-estadisticas {
-    background-color: var(--color-blanco);
-    border: 1px solid var(--color-borde);
-    border-radius: 12px;
-    padding: 18px 20px;
     margin-bottom: 18px;
-    display: grid;
     grid-template-columns: 1.5fr 1.2fr auto;
-    gap: 16px;
-    align-items: end;
 }
 
 .metricas-grid {
@@ -1804,7 +1818,7 @@ button:disabled {
 }
 
 /* ==========================================================================
-   12f. PORTADA DE INICIO, PRODUCTOS DESTACADOS Y LIKES (H.U-10 / HU10-T01)
+   12f. PORTADA DE INICIO Y DESTACADOS (H.U-10 / HU10-T01)
    ========================================================================== */
 .hero-inicio {
     background: linear-gradient(135deg, #2C1A11 0%, #4A2E1F 100%);
@@ -1884,32 +1898,6 @@ button:disabled {
     font-weight: 600;
     color: var(--color-oscuro);
     font-size: 1.02rem;
-}
-
-/* Interfaz de Likes (Firebase): Botón de corazón (♡ / ♥) y contador */
-.btn-like {
-    transition: transform 0.15s ease, background-color 0.2s ease, border-color 0.2s ease;
-    box-shadow: 0 2px 6px rgba(44, 26, 17, 0.12);
-}
-
-.btn-like:hover {
-    transform: scale(1.06);
-    border-color: var(--color-rojo);
-}
-
-.corazon-icono {
-    font-size: 1rem;
-    line-height: 1;
-    color: var(--color-rojo);
-}
-
-.btn-like.like-activo .corazon-icono {
-    color: var(--color-rojo);
-}
-
-.like-contador {
-    font-size: 0.82rem;
-    font-weight: 700;
 }
 
 /* Checkbox y etiquetas de "Destacado" en el panel de productos (HU10-T01) */

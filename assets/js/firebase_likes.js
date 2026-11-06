@@ -1,10 +1,6 @@
-/**
- * Esto te toca a vos iñaki:
- * - Maquetar el botón de corazón (♡ / ♥) y su contador numérico en las tarjetas de 
- *   index.php y catalogo.php (HU10-T01 e Interfaz de Likes).
- * - Aplicar y ajustar en assets/css/estilos.css las clases .btn-like, .like-activo, 
- *   .corazon-icono y .like-contador.
-*/
+// assets/js/firebase_likes.js
+// Integración con Firebase Realtime Database para leer y actualizar el árbol JSON
+// /likes_productos/prod_{id_producto} e impedir likes duplicados por visitante (H.U-10)
 
 document.addEventListener("DOMContentLoaded", function () {
     // URL base de Firebase Realtime Database del proyecto 'mai-panaderia'
@@ -75,9 +71,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const data = await respuesta.json();
             if (!data) return 0;
             if (typeof data === "number") return data;
-            // Las reglas de Firebase validan y almacenan 'total'
             if (typeof data.total === "number") return data.total;
-            if (typeof data.likes === "number") return data.likes;
             return 0;
         } catch (error) {
             console.info(`[Firebase Likes] Modo offline o sin conexión en prod_${idProducto}:`, error.message);
@@ -86,10 +80,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // 6. Actualizar e incrementar contador en el árbol JSON /likes_productos/prod_{id_producto}
-    // Nota: Las reglas de seguridad de Firebase exigen:
-    // .validate: newData.hasChildren(['id_producto', 'total'])
-    // id_producto: newData.isNumber() && newData.val() > 0
-    // total: newData.isNumber() && newData.val() >= 0
     async function incrementarLikeEnFirebase(idProducto, totalActual) {
         const idNum = parseInt(idProducto, 10);
         if (isNaN(idNum) || idNum <= 0) {
@@ -105,9 +95,8 @@ document.addEventListener("DOMContentLoaded", function () {
             const resActual = await fetch(endpoint, { method: "GET" });
             if (resActual.ok) {
                 const dataActual = await resActual.json();
-                if (dataActual) {
-                    if (typeof dataActual.total === "number") conteoBase = dataActual.total;
-                    else if (typeof dataActual.likes === "number") conteoBase = dataActual.likes;
+                if (dataActual && typeof dataActual.total === "number") {
+                    conteoBase = dataActual.total;
                 }
             }
         } catch (_) {
@@ -124,9 +113,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 body: JSON.stringify({
                     id_producto: idNum,
                     total: nuevoTotal,
-                    likes: nuevoTotal,
-                    actualizado_en: ahoraIso,
-                    ultima_actualizacion: ahoraIso
+                    actualizado_en: ahoraIso
                 })
             });
 
@@ -168,7 +155,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // 8. Seleccionar todos los botones de likes maquetados por Iñaki en las tarjetas
+    // 8. Seleccionar todos los botones de likes en las tarjetas de index.php y catalogo.php
     const botonesLike = document.querySelectorAll(".btn-like");
     if (!botonesLike || botonesLike.length === 0) {
         return;
@@ -192,7 +179,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 let count = 0;
                 if (nodo) {
                     if (typeof nodo.total === "number") count = nodo.total;
-                    else if (typeof nodo.likes === "number") count = nodo.likes;
                     else if (typeof nodo === "number") count = nodo;
                 }
                 const contadorSpan = boton.querySelector(".like-contador");
@@ -243,4 +229,3 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 });
-
