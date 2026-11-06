@@ -1,6 +1,6 @@
 <?php
 // panel/productos.php
-// Gestión de productos en el panel interno (H.U-09)
+// Gestión de productos en el panel interno (H.U-08, H.U-09, H.U-10)
 
 require_once '../includes/auth.php';
 require_once '../config/conexion.php';
@@ -21,7 +21,8 @@ if (isset($_SESSION["mensaje_error"])) {
     unset($_SESSION["mensaje_error"]);
 }
 
-$sql = "SELECT id_producto, nombre, descripcion, precio, categoria, imagen_url, disponible, destacado, dias_habilitados FROM productos ORDER BY id_producto DESC";
+// Filtrar productos activos para no listar los dados de baja lógica (HU09-T03)
+$sql = "SELECT id_producto, nombre, descripcion, precio, categoria, imagen_url, disponible, destacado, dias_habilitados FROM productos WHERE (activo = 1 OR activo IS NULL) ORDER BY id_producto DESC";
 $stmt = $conexion->prepare($sql);
 $stmt->execute();
 $resultado = $stmt->get_result();
@@ -40,7 +41,13 @@ require_once '../includes/header_panel.php';
 <div class="contenedor contenedor-panel">
     <div class="cabecera-seccion-panel">
         <h2>Gestión del Catálogo de Productos</h2>
-        <p>Agregá nuevos productos artesanales, asigná su categoría, precio, foto y días de elaboración.</p>
+        <p>
+            <?php if (es_administrador()): ?>
+                Agregá nuevos productos artesanales, asigná su categoría, precio, foto, días de elaboración y estado.
+            <?php else: ?>
+                Control de disponibilidad y stock de productos para el personal de cocina y mostrador.
+            <?php endif; ?>
+        </p>
     </div>
 
     <?php if (!empty($mensaje_exito)): ?>
@@ -55,7 +62,8 @@ require_once '../includes/header_panel.php';
         </div>
     <?php endif; ?>
 
-    <!-- HU09-T01: Formulario de gestión de productos -->
+    <!-- HU09-T01: Formulario de gestión de productos (Solo visible para rol Administrador - RNF-02) -->
+    <?php if (es_administrador()): ?>
     <section class="seccion-formulario">
         <h3>Agregar Nuevo Producto</h3>
 
@@ -121,7 +129,7 @@ require_once '../includes/header_panel.php';
                     </label>
                 </div>
 
-                <!-- HU10-T01: Checkbox opcional "Destacado" en el formulario de productos del administrador -->
+                <!-- HU10-T01: Checkbox opcional "Destacado" exclusivo para Administrador -->
                 <div class="grupo-formulario">
                     <label class="checkbox-disponible checkbox-destacado">
                         <input type="checkbox" name="destacado" value="1">
@@ -133,6 +141,7 @@ require_once '../includes/header_panel.php';
             <button type="submit" class="btn btn-primario">Guardar Producto</button>
         </form>
     </section>
+    <?php endif; ?>
 
     <section class="seccion-listado">
         <h3>Listado de Productos</h3>
@@ -170,24 +179,31 @@ require_once '../includes/header_panel.php';
                                 <td><strong>$<?php echo (int)$prod["precio"]; ?></strong></td>
                                 <td class="celda-dias"><?php echo htmlspecialchars(str_replace(",", ", ", $prod["dias_habilitados"]), ENT_QUOTES, 'UTF-8'); ?></td>
                                 <td>
-                                    <!-- HU10-T01: Control para alternar si el producto es Destacado -->
-                                    <form action="acciones/producto_estado.php" method="POST" class="form-estado-stock">
-                                        <input type="hidden" name="id_producto" value="<?php echo (int)$prod["id_producto"]; ?>">
-                                        <input type="hidden" name="accion" value="destacado">
-                                        <input type="hidden" name="destacado" value="<?php echo ((int)$prod["destacado"] === 1) ? 0 : 1; ?>">
-                                        <label class="switch-stock">
-                                            <input
-                                                type="checkbox"
-                                                onchange="this.form.submit()"
-                                                <?php echo ((int)$prod["destacado"] === 1) ? 'checked' : ''; ?>
-                                            >
-                                            <span class="<?php echo ((int)$prod["destacado"] === 1) ? 'estado-destacado-activo' : 'estado-destacado-inactivo'; ?>">
-                                                <?php echo ((int)$prod["destacado"] === 1) ? '★ Destacado' : 'Normal'; ?>
-                                            </span>
-                                        </label>
-                                    </form>
+                                    <!-- HU10-T01: Control para Destacado (Interactivo para Admin, solo lectura para Empleado) -->
+                                    <?php if (es_administrador()): ?>
+                                        <form action="acciones/producto_estado.php" method="POST" class="form-estado-stock">
+                                            <input type="hidden" name="id_producto" value="<?php echo (int)$prod["id_producto"]; ?>">
+                                            <input type="hidden" name="accion" value="destacado">
+                                            <input type="hidden" name="destacado" value="<?php echo ((int)$prod["destacado"] === 1) ? 0 : 1; ?>">
+                                            <label class="switch-stock">
+                                                <input
+                                                    type="checkbox"
+                                                    onchange="this.form.submit()"
+                                                    <?php echo ((int)$prod["destacado"] === 1) ? 'checked' : ''; ?>
+                                                >
+                                                <span class="<?php echo ((int)$prod["destacado"] === 1) ? 'estado-destacado-activo' : 'estado-destacado-inactivo'; ?>">
+                                                    <?php echo ((int)$prod["destacado"] === 1) ? '★ Destacado' : 'Normal'; ?>
+                                                </span>
+                                            </label>
+                                        </form>
+                                    <?php else: ?>
+                                        <span class="<?php echo ((int)$prod["destacado"] === 1) ? 'estado-destacado-activo' : 'estado-destacado-inactivo'; ?>">
+                                            <?php echo ((int)$prod["destacado"] === 1) ? '★ Destacado' : 'Normal'; ?>
+                                        </span>
+                                    <?php endif; ?>
                                 </td>
                                 <td>
+                                    <!-- HU08-T02: Interruptor de disponibilidad interactivo para Empleado y Administrador -->
                                     <form action="acciones/producto_estado.php" method="POST" class="form-estado-stock">
                                         <input type="hidden" name="id_producto" value="<?php echo (int)$prod["id_producto"]; ?>">
                                         <input type="hidden" name="disponible" value="<?php echo ((int)$prod["disponible"] === 1) ? 0 : 1; ?>">
@@ -204,13 +220,18 @@ require_once '../includes/header_panel.php';
                                     </form>
                                 </td>
                                 <td>
-                                    <div class="acciones-fila-tabla">
-                                        <a href="producto_editar.php?id=<?php echo (int)$prod["id_producto"]; ?>" class="btn btn-secundario btn-pequeno">Editar</a>
-                                        <form action="acciones/producto_baja.php" method="POST" class="form-baja-producto" onsubmit="return confirm('¿Estás seguro de que deseás dar de baja este producto?');">
-                                            <input type="hidden" name="id_producto" value="<?php echo (int)$prod["id_producto"]; ?>">
-                                            <button type="submit" class="btn-quitar-item">Dar de baja</button>
-                                        </form>
-                                    </div>
+                                    <!-- HU09-T03: Botones de editar y dar de baja (Exclusivos para Administrador) -->
+                                    <?php if (es_administrador()): ?>
+                                        <div class="acciones-fila-tabla">
+                                            <a href="producto_editar.php?id=<?php echo (int)$prod["id_producto"]; ?>" class="btn btn-secundario btn-pequeno">Editar</a>
+                                            <form action="acciones/producto_baja.php" method="POST" class="form-baja-producto" onsubmit="return confirm('¿Seguro que deseas dar de baja este producto?');">
+                                                <input type="hidden" name="id_producto" value="<?php echo (int)$prod["id_producto"]; ?>">
+                                                <button type="submit" class="btn-quitar-item" onclick="return confirm('¿Seguro que deseas dar de baja este producto?');">Dar de baja</button>
+                                            </form>
+                                        </div>
+                                    <?php else: ?>
+                                        <span class="sin-permisos-texto" style="color: #888; font-size: 0.85rem;">Solo lectura</span>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

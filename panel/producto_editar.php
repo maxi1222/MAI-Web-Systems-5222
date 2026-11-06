@@ -3,6 +3,7 @@
 // Edición de un producto existente en el panel interno (H.U-09)
 
 require_once '../includes/auth.php';
+requerir_administrador();
 require_once '../config/conexion.php';
 
 $ruta_base = "../";
@@ -30,7 +31,7 @@ if ($id_producto <= 0) {
     exit();
 }
 
-$sql_prod = "SELECT id_producto, nombre, descripcion, precio, categoria, imagen_url, disponible, destacado, dias_habilitados FROM productos WHERE id_producto = ?";
+$sql_prod = "SELECT id_producto, nombre, descripcion, precio, categoria, imagen_url, disponible, destacado, dias_habilitados FROM productos WHERE id_producto = ? AND (activo = 1 OR activo IS NULL)";
 $stmt_prod = $conexion->prepare($sql_prod);
 $stmt_prod->bind_param("i", $id_producto);
 $stmt_prod->execute();
@@ -44,7 +45,7 @@ if (!$producto) {
     exit();
 }
 
-$sql_todos = "SELECT id_producto, nombre, descripcion, precio, categoria, imagen_url, disponible, destacado, dias_habilitados FROM productos ORDER BY id_producto DESC";
+$sql_todos = "SELECT id_producto, nombre, descripcion, precio, categoria, imagen_url, disponible, destacado, dias_habilitados FROM productos WHERE (activo = 1 OR activo IS NULL) ORDER BY id_producto DESC";
 $stmt_todos = $conexion->prepare($sql_todos);
 $stmt_todos->execute();
 $res_todos = $stmt_todos->get_result();
@@ -279,9 +280,9 @@ require_once '../includes/header_panel.php';
                                 <td>
                                     <div class="acciones-fila-tabla">
                                         <a href="producto_editar.php?id=<?php echo (int)$prod["id_producto"]; ?>" class="btn btn-secundario btn-pequeno">Editar</a>
-                                        <form action="acciones/producto_baja.php" method="POST" class="form-baja-producto" onsubmit="return confirm('¿Estás seguro de que deseás dar de baja este producto?');">
+                                        <form action="acciones/producto_baja.php" method="POST" class="form-baja-producto" onsubmit="return confirm('¿Seguro que deseas dar de baja este producto?');">
                                             <input type="hidden" name="id_producto" value="<?php echo (int)$prod["id_producto"]; ?>">
-                                            <button type="submit" class="btn-quitar-item">Dar de baja</button>
+                                            <button type="submit" class="btn-quitar-item" onclick="return confirm('¿Seguro que deseas dar de baja este producto?');">Dar de baja</button>
                                         </form>
                                     </div>
                                 </td>

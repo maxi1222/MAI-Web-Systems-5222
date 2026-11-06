@@ -167,7 +167,7 @@ MAI-Web-Systems-5222/
 │   │   ├── pedido_estado.php         # Actualiza el estado de un pedido
 │   │   ├── producto_estado.php       # Cambia disponibilidad o destacado
 │   │   └── producto_guardar.php      # Registra o actualiza productos
-|   |   |__ prodcuto_baja.php       
+│   │   └── producto_baja.php         # Realiza la baja lógica del producto       
 │   ├── agenda.php
 │   ├── calendario.php
 │   ├── estadisticas.php

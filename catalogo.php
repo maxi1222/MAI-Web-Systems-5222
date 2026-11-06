@@ -25,7 +25,7 @@ $categorias_disponibles = array(
 
 // Consultar productos de la base de datos
 $todos_los_productos = array();
-$sql = "SELECT id_producto, nombre, descripcion, precio, categoria, imagen_url, disponible, destacado, dias_habilitados FROM productos ORDER BY disponible DESC, nombre ASC";
+$sql = "SELECT id_producto, nombre, descripcion, precio, categoria, imagen_url, disponible, destacado, dias_habilitados FROM productos WHERE (activo = 1 OR activo IS NULL) ORDER BY disponible DESC, nombre ASC";
 $resultado = $conexion->query($sql);
 
 if ($resultado && $resultado->num_rows > 0) {
@@ -267,6 +267,9 @@ require_once 'includes/header_publico.php';
                                 <form action="acciones/carrito_agregar.php" method="POST" class="form-agregar-carrito">
                                     <input type="hidden" name="id_producto" value="<?php echo (int)$prod["id_producto"]; ?>">
                                     <input type="hidden" name="cantidad" value="1">
+                                    <?php if (!empty($fecha_retiro)): ?>
+                                        <input type="hidden" name="fecha_retiro" value="<?php echo htmlspecialchars($fecha_retiro, ENT_QUOTES, 'UTF-8'); ?>">
+                                    <?php endif; ?>
                                     <button type="submit" class="btn btn-primario btn-bloque">Encargar</button>
                                 </form>
                             <?php endif; ?>

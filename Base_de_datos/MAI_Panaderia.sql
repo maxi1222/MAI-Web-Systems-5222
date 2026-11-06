@@ -51,7 +51,8 @@ CREATE TABLE productos (
   imagen_url varchar(255) DEFAULT NULL,
   disponible tinyint(1) DEFAULT 1,
   destacado tinyint(1) DEFAULT 0,
-  dias_habilitados varchar(150) DEFAULT 'Lunes,Martes,Miercoles,Jueves,Viernes,Sabado,Domingo'
+  dias_habilitados varchar(150) DEFAULT 'Lunes,Martes,Miercoles,Jueves,Viernes,Sabado,Domingo',
+  activo tinyint(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 

@@ -23,4 +23,12 @@ function requerir_administrador() {
         exit();
     }
 }
+
+function requerir_admin() {
+    requerir_administrador();
+}
+
+function verificar_admin() {
+    requerir_administrador();
+}
 ?>

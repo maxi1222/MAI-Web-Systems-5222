@@ -14,7 +14,6 @@ function validar_anticipacion_minima($fecha_hora_str) {
         return false;
     }
 
-    // Corregimos el error del código original agregando el asterisco (*)
     // Multiplicamos 24 horas por 3600 segundos (segundos en una hora)
     $ts_minimo = time() + (HORAS_ANTICIPACION_MINIMA * 3600);
 
@@ -60,14 +59,15 @@ function determinar_turno($fecha_hora_str) {
     // Extraemos la hora en formato de 24 horas (de 00 a 23)
     $hora = (int)date('H', $ts);
 
-    // Definimos el turno según el horario de la panadería
+    // Definimos el turno según el horario de la panadería con el prefijo "Turno"
+    // para evitar confusiones con la palabra "Mañana" de fecha/día
     if ($hora >= 6 && $hora < 13) {
-        return 'Mañana';
+        return 'Turno Mañana';
     } elseif ($hora >= 13 && $hora < 20) {
-        return 'Tarde';
+        return 'Turno Tarde';
     } else {
-        return 'Fuera de horario';
+        return 'Turno Noche';
     }
 }
 
-?> 
+?>

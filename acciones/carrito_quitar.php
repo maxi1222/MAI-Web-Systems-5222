@@ -6,11 +6,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $accion = isset($_POST['accion']) ? $_POST['accion'] : '';
 
     if ($accion === 'eliminar' && $id_producto > 0) {
-        unset($_SESSION['carrito'][$id_producto]);
+        if (isset($_SESSION['carrito'][$id_producto])) {
+            unset($_SESSION['carrito'][$id_producto]);
+        }
     }
 
     if ($accion === 'vaciar') {
         $_SESSION['carrito'] = [];
+        unset($_SESSION['fecha_retiro_seleccionada']);
     }
 }
 

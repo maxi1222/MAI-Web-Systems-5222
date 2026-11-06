@@ -2,6 +2,7 @@
 // panel/acciones/producto_guardar.php
 
 require_once '../../includes/auth.php';
+requerir_administrador();
 require_once '../../config/conexion.php';
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {

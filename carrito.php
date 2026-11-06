@@ -20,10 +20,20 @@ if (isset($_SESSION["errores_pedido"]) && !empty($_SESSION["errores_pedido"])) {
 $datos_previos = isset($_SESSION["datos_form_pedido"]) ? $_SESSION["datos_form_pedido"] : array();
 $nombre_previo = isset($datos_previos["nombre_cliente"]) ? $datos_previos["nombre_cliente"] : "";
 $telefono_previo = isset($datos_previos["telefono_cliente"]) ? $datos_previos["telefono_cliente"] : "";
-$fecha_dia_previa = isset($datos_previos["fecha_retiro_dia"]) ? $datos_previos["fecha_retiro_dia"] : "";
-$fecha_hora_previa = isset($datos_previos["fecha_retiro_hora"]) ? $datos_previos["fecha_retiro_hora"] : "";
 
-// Fecha mínima inicial para el input date (mañana)
+// Fecha de retiro: mantener la seleccionada si viene de catalogo.php o de un intento previo
+$fecha_dia_previa = "";
+if (isset($datos_previos["fecha_retiro_dia"]) && !empty($datos_previos["fecha_retiro_dia"])) {
+    $fecha_dia_previa = $datos_previos["fecha_retiro_dia"];
+} elseif (isset($_SESSION["fecha_retiro_seleccionada"]) && !empty($_SESSION["fecha_retiro_seleccionada"])) {
+    $fecha_dia_previa = $_SESSION["fecha_retiro_seleccionada"];
+} elseif (isset($_GET["fecha_retiro"]) && !empty(trim($_GET["fecha_retiro"]))) {
+    $fecha_dia_previa = trim($_GET["fecha_retiro"]);
+}
+
+$fecha_hora_previa = isset($datos_previos["fecha_retiro_hora"]) ? $datos_previos["fecha_retiro_hora"] : "10:00";
+
+// Fecha mínima inicial para el input date (mañana / 24 horas de anticipación)
 $fecha_minima = date("Y-m-d", strtotime("+1 day"));
 
 require_once __DIR__ . '/includes/header_publico.php';
@@ -74,12 +84,13 @@ require_once __DIR__ . '/includes/header_publico.php';
 
                 <div class="carrito-lista">
                     <?php
-                    $total_general = 0;
+                    $total_general = 0.0;
                     foreach ($_SESSION["carrito"] as $id => $cantidad):
                         $id_limpio = (int)$id;
                         $cantidad_limpia = (int)$cantidad;
+                        if ($cantidad_limpia <= 0) continue;
 
-                        $sql_item = "SELECT id_producto, nombre, precio, categoria, dias_habilitados FROM productos WHERE id_producto = ?";
+                        $sql_item = "SELECT id_producto, nombre, precio, categoria, dias_habilitados FROM productos WHERE id_producto = ? AND (activo = 1 OR activo IS NULL)";
                         $stmt_item = $conexion->prepare($sql_item);
                         $stmt_item->bind_param("i", $id_limpio);
                         $stmt_item->execute();
@@ -88,14 +99,15 @@ require_once __DIR__ . '/includes/header_publico.php';
                         $stmt_item->close();
 
                         if ($item):
-                            $subtotal = (int)$item["precio"] * $cantidad_limpia;
-                            $total_general = $total_general + $subtotal;
+                            $precio_real = (float)$item["precio"];
+                            $subtotal = $precio_real * $cantidad_limpia;
+                            $total_general += $subtotal;
                     ?>
                         <div class="carrito-fila-item">
                             <div class="carrito-item-info">
                                 <h3><?php echo htmlspecialchars($item["nombre"], ENT_QUOTES, 'UTF-8'); ?></h3>
                                 <p class="carrito-item-detalle">
-                                    Precio unitario: $<?php echo (int)$item["precio"]; ?> · Cantidad: <strong><?php echo $cantidad_limpia; ?></strong>
+                                    Precio unitario: $<?php echo (int)$precio_real; ?> · Cantidad: <strong><?php echo $cantidad_limpia; ?></strong>
                                 </p>
                                 <small class="carrito-item-dias">
                                     Días de elaboración: <?php echo htmlspecialchars(str_replace(",", ", ", $item["dias_habilitados"]), ENT_QUOTES, 'UTF-8'); ?>
@@ -103,7 +115,7 @@ require_once __DIR__ . '/includes/header_publico.php';
                             </div>
 
                             <div class="carrito-item-derecha">
-                                <span class="carrito-item-subtotal">$<?php echo $subtotal; ?></span>
+                                <span class="carrito-item-subtotal">$<?php echo number_format($subtotal, 0, '', ''); ?></span>
                                 <form action="acciones/carrito_quitar.php" method="POST">
                                     <input type="hidden" name="id_producto" value="<?php echo (int)$item["id_producto"]; ?>">
                                     <input type="hidden" name="accion" value="eliminar">
@@ -119,7 +131,7 @@ require_once __DIR__ . '/includes/header_publico.php';
 
                 <div class="carrito-total-barra">
                     <span>Total estimado a pagar al retirar:</span>
-                    <strong class="carrito-total-monto">$<?php echo $total_general; ?></strong>
+                    <strong class="carrito-total-monto">$<?php echo number_format($total_general, 0, '', ''); ?></strong>
                 </div>
 
                 <div class="carrito-seguir-comprando">

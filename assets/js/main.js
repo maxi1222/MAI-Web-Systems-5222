@@ -41,6 +41,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Bloquear en el calendario de HTML las fechas pasadas y el día actual
         inputFechaDia.setAttribute("min", fechaMinimaTexto);
+
+        // Si ya hay un valor asignado (por ejemplo, fecha seleccionada a 1 mes), NO sobreescribirlo a menos que sea anterior a la mínima
+        if (inputFechaDia.value && inputFechaDia.value < fechaMinimaTexto) {
+            inputFechaDia.value = fechaMinimaTexto;
+        }
     }
 
     if (formPedidoCarrito) {
@@ -74,7 +79,7 @@ document.addEventListener("DOMContentLoaded", function () {
             var limiteMinimo24h = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
             // Comprobar si la fecha y hora de retiro es menor a 24 horas desde ahora
-            if (isNaN(fechaHoraRetiro.getTime()) || fechaHoraRetiro < limiteMinimo24h) {
+            if (isNaN(fechaHoraRetiro.getTime()) || fechaHoraRetiro.getTime() < limiteMinimo24h.getTime()) {
                 evento.preventDefault();
                 mostrarErrorPedido("Los pedidos deben realizarse con al menos 1 día (24 horas) de anticipación.");
                 return;

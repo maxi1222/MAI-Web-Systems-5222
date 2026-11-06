@@ -11,8 +11,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || empty($_SESSION['carrito'])) {
 
 $nombre_cliente = isset($_POST['nombre_cliente']) ? trim($_POST['nombre_cliente']) : '';
 $telefono_raw = isset($_POST['telefono_cliente']) ? trim($_POST['telefono_cliente']) : '';
-$fecha_retiro_dia = isset($_POST['fecha_retiro_dia']) ? $_POST['fecha_retiro_dia'] : '';
-$fecha_retiro_hora = isset($_POST['fecha_retiro_hora']) ? $_POST['fecha_retiro_hora'] : '';
+$fecha_retiro_dia = isset($_POST['fecha_retiro_dia']) ? trim($_POST['fecha_retiro_dia']) : '';
+$fecha_retiro_hora = isset($_POST['fecha_retiro_hora']) ? trim($_POST['fecha_retiro_hora']) : '';
 
 $_SESSION['datos_form_pedido'] = [
     'nombre_cliente'    => $nombre_cliente,
@@ -23,12 +23,12 @@ $_SESSION['datos_form_pedido'] = [
 
 $errores = [];
 
+if (empty($nombre_cliente) || empty($telefono_raw)) {
+    $errores[] = "Debe completar obligatoriamente su nombre y teléfono.";
+}
 
 $fecha_hora_mysql = '';
-        if (empty($nombre_cliente) || empty($telefono_raw)) {
-            $errores[] = "Debe completar obligatoriamente su nombre y teléfono.";
-        }
-        if (empty($fecha_retiro_dia) || empty($fecha_retiro_hora)) {
+if (empty($fecha_retiro_dia) || empty($fecha_retiro_hora)) {
     $errores[] = "Debe seleccionar obligatoriamente la fecha y la hora de retiro.";
 } else {
     $fecha_hora_candidata = $fecha_retiro_dia . ' ' . $fecha_retiro_hora . ':00';
@@ -41,9 +41,8 @@ $fecha_hora_mysql = '';
         $fecha_hora_mysql = date('Y-m-d H:i:s', $ts_retiro);
 
         if ($ts_retiro < $ts_minimo) {
-            $errores[] = "Los pedidos deben realizarse con al menos 1 día de anticipación";
+            $errores[] = "Los pedidos deben realizarse con al menos 1 día (24 horas) de anticipación.";
         }
-
 
         $sql_cupo = "SELECT COUNT(*) AS total FROM pedidos WHERE DATE(fecha_retiro) = ?";
         $stmt_cupo = mysqli_prepare($conexion, $sql_cupo);
@@ -64,7 +63,6 @@ $fecha_hora_mysql = '';
     }
 }
 
-
 $dia_con_tilde = !empty($fecha_retiro_dia) ? obtener_dia_semana($fecha_retiro_dia) : '';
 $dia_semana_retiro = str_replace(['é', 'á', 'É', 'Á'], ['e', 'a', 'E', 'A'], $dia_con_tilde);
 $items_validados = [];
@@ -74,7 +72,7 @@ foreach ($_SESSION['carrito'] as $id_producto => $cantidad) {
     $cant_int = (int)$cantidad;
     if ($cant_int <= 0) continue;
 
-    $sql_prod = "SELECT id_producto, nombre, precio, disponible, dias_habilitados FROM productos WHERE id_producto = ?";
+    $sql_prod = "SELECT id_producto, nombre, precio, disponible, dias_habilitados FROM productos WHERE id_producto = ? AND (activo = 1 OR activo IS NULL)";
     $stmt_prod = mysqli_prepare($conexion, $sql_prod);
 
     if ($stmt_prod) {
@@ -96,7 +94,7 @@ foreach ($_SESSION['carrito'] as $id_producto => $cantidad) {
 
         $dias_habilitados_sin_tilde = str_replace(['é', 'á', 'É', 'Á'], ['e', 'a', 'E', 'A'], $fila_p['dias_habilitados']);
         if (!empty($dia_semana_retiro) && stripos($dias_habilitados_sin_tilde, $dia_semana_retiro) === false) {
-            $errores[] = "El producto \"" . $fila_p['nombre'] . "\" no se elabora el día seleccionado.";
+            $errores[] = "El producto \"" . $fila_p['nombre'] . "\" no se elabora el día seleccionado (" . $dia_con_tilde . ").";
             continue;
         }
 
@@ -117,7 +115,6 @@ if (!empty($errores)) {
     header("Location: ../carrito.php");
     exit();
 }
-
 
 mysqli_begin_transaction($conexion);
 
@@ -170,7 +167,7 @@ if ($exito_transaccion && $id_nuevo_pedido > 0) {
     mysqli_commit($conexion);
     
     $_SESSION['carrito'] = [];
-    unset($_SESSION['datos_form_pedido'], $_SESSION['errores_pedido']);
+    unset($_SESSION['datos_form_pedido'], $_SESSION['errores_pedido'], $_SESSION['fecha_retiro_seleccionada']);
     
     header("Location: ../confirmacion.php?id=" . $id_nuevo_pedido);
     exit();
