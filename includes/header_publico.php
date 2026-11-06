@@ -13,12 +13,8 @@ $titulo_pagina = isset($titulo_pagina) ? $titulo_pagina : "Panadería La Ideal -
 // Contar cuántos productos hay en el carrito de sesión
 $total_carrito = 0;
 if (isset($_SESSION["carrito"]) && is_array($_SESSION["carrito"])) {
-    foreach ($_SESSION["carrito"] as $item) {
-        if (isset($item["cantidad"])) {
-            $total_carrito = $total_carrito + (int)$item["cantidad"];
-        } else {
-            $total_carrito = $total_carrito + (int)$item;
-        }
+    foreach ($_SESSION["carrito"] as $cantidad_item) {
+        $total_carrito += (int)$cantidad_item;
     }
 }
 ?>

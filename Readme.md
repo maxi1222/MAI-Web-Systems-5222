@@ -143,9 +143,7 @@ MAI-Web-Systems-5222/
 │   │   └── estilos.css
 │   ├── img/
 │   │   └── productos/
-│   │       ├── default_panaderia.svg
-│   │       ├── imagenes.txt
-│   │       └── 1793195543_IMG_20251210_142718.jpg
+│   │       └── default_panaderia.svg
 │   └── js/
 │       ├── main.js
 │       └── firebase_likes.js
@@ -165,9 +163,9 @@ MAI-Web-Systems-5222/
 ├── panel/
 │   ├── acciones/                     # Procesos del panel interno
 │   │   ├── pedido_estado.php         # Actualiza el estado de un pedido
+│   │   ├── producto_baja.php         # Realiza la baja lógica del producto
 │   │   ├── producto_estado.php       # Cambia disponibilidad o destacado
 │   │   └── producto_guardar.php      # Registra o actualiza productos
-│   │   └── producto_baja.php         # Realiza la baja lógica del producto       
 │   ├── agenda.php
 │   ├── calendario.php
 │   ├── estadisticas.php
@@ -180,7 +178,7 @@ MAI-Web-Systems-5222/
 ├── catalogo.php
 ├── confirmacion.php
 ├── index.php
-└── README.md
+└── Readme.md
 
 ## Alcance y consideraciones
 

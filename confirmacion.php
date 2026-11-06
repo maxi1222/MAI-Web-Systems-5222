@@ -1,18 +1,28 @@
 <?php
 // confirmacion.php
-// Vista de confirmación del pedido con bloqueo de edición y botón de aviso modal (H.U-02 y H.U-03)
+// Vista de confirmación de pedido en modo solo lectura con botón y modal de cancelación/modificación (H.U-03)
 
-require_once __DIR__ . '/config/conexion.php';
+session_start();
+require_once 'config/conexion.php';
 
 $ruta_base = "";
 $pagina_actual = "carrito";
 $titulo_pagina = "Confirmación de Pedido - Panadería La Ideal";
 
-$id_pedido = isset($_GET["id"]) ? (int)$_GET["id"] : 0;
+$id_pedido = (isset($_GET["id"]) && is_numeric($_GET["id"])) ? (int)$_GET["id"] : 0;
 
-// Consultar la cabecera del pedido
-$pedido = null;
+// Solo mostrar los datos del pedido si pertenece a la sesión actual del cliente o a personal logueado
+$autorizado_ver_pedido = false;
 if ($id_pedido > 0) {
+    if (isset($_SESSION["ultimo_pedido_id"]) && (int)$_SESSION["ultimo_pedido_id"] === $id_pedido) {
+        $autorizado_ver_pedido = true;
+    } elseif (isset($_SESSION["id_usuario"])) {
+        $autorizado_ver_pedido = true;
+    }
+}
+
+$pedido = null;
+if ($autorizado_ver_pedido) {
     $sql = "SELECT id_pedido, nombre_cliente, telefono_cliente, fecha_retiro, estado, fecha_creacion FROM pedidos WHERE id_pedido = ?";
     $stmt = $conexion->prepare($sql);
     $stmt->bind_param("i", $id_pedido);
@@ -22,7 +32,6 @@ if ($id_pedido > 0) {
     $stmt->close();
 }
 
-// Consultar los productos incluidos en el pedido para mostrar el resumen completo
 $detalles_pedido = array();
 $total_pedido = 0;
 
@@ -38,16 +47,17 @@ if ($pedido) {
 
     while ($fila_det = $res_det->fetch_assoc()) {
         $detalles_pedido[] = $fila_det;
-        $total_pedido = $total_pedido + ((int)$fila_det["cantidad"] * (float)$fila_det["precio_unitario"]);
+        $total_pedido = $total_pedido + ((int)$fila_det["cantidad"] * (int)$fila_det["precio_unitario"]);
     }
     $stmt_det->close();
 }
 
-require_once __DIR__ . '/includes/header_publico.php';
+require_once 'includes/header_publico.php';
 ?>
 
 <section class="contenedor seccion-confirmacion">
     <?php if ($pedido): ?>
+        <!-- HU03-T03: Bloqueo de edición en pantalla (datos en modo de solo lectura) -->
         <div class="tarjeta-confirmacion">
             <div class="confirmacion-encabezado">
                 <span class="icono-exito-pedido">✓</span>
@@ -55,7 +65,6 @@ require_once __DIR__ . '/includes/header_publico.php';
                 <p>Tu encargo fue recibido correctamente. Guardá tu número de pedido para retirarlo en el local.</p>
             </div>
 
-            <!-- HU03-T03: Resumen del pedido en modo solo lectura (edición bloqueada en pantalla) -->
             <div class="confirmacion-datos-grid">
                 <div class="dato-caja">
                     <span class="dato-etiqueta">Número de Pedido</span>
@@ -105,7 +114,7 @@ require_once __DIR__ . '/includes/header_publico.php';
                 Los datos de un pedido confirmado no pueden editarse directamente desde la web.
             </p>
 
-            <!-- HU03-T01: Botón "Modificar o Cancelar Pedido" que abre el modal de aviso telefónico -->
+            <!-- HU03-T01: Botón de modificación o cancelación -->
             <div class="confirmacion-acciones">
                 <button type="button" id="btnModificarCancelarPedido" class="btn btn-secundario">
                     Modificar o Cancelar Pedido
@@ -116,12 +125,12 @@ require_once __DIR__ . '/includes/header_publico.php';
     <?php else: ?>
         <div class="mensaje-vacio">
             <h3>No se encontró el pedido solicitado</h3>
-            <p>Verificá el número de pedido o regresá al catálogo de la tienda.</p>
+            <p>Por motivos de privacidad, el comprobante solo está disponible durante la sesión en la que se registró el encargo.</p>
             <a href="catalogo.php" class="btn btn-primario">Ir al Catálogo</a>
         </div>
     <?php endif; ?>
 </section>
 
 <?php
-require_once __DIR__ . '/includes/footer.php';
+require_once 'includes/footer.php';
 ?>

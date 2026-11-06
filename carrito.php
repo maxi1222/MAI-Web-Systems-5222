@@ -3,7 +3,7 @@
 // Vista del carrito de compras y formulario de datos y fecha/hora de retiro (H.U-02 / HU02-T02)
 
 session_start();
-require_once __DIR__ . '/config/conexion.php';
+require_once 'config/conexion.php';
 
 $ruta_base = "";
 $pagina_actual = "carrito";
@@ -36,7 +36,44 @@ $fecha_hora_previa = isset($datos_previos["fecha_retiro_hora"]) ? $datos_previos
 // Fecha mínima inicial para el input date (mañana / 24 horas de anticipación)
 $fecha_minima = date("Y-m-d", strtotime("+1 day"));
 
-require_once __DIR__ . '/includes/header_publico.php';
+// Preparar una única sentencia SQL reutilizable para consultar los productos del carrito
+$productos_carrito = array();
+$total_general = 0;
+
+if (!empty($_SESSION["carrito"])) {
+    $sql_item = "SELECT id_producto, nombre, precio, categoria, dias_habilitados
+                 FROM productos
+                 WHERE id_producto = ? AND (activo = 1 OR activo IS NULL)";
+    $stmt_item = $conexion->prepare($sql_item);
+
+    if ($stmt_item) {
+        foreach ($_SESSION["carrito"] as $id => $cantidad) {
+            $id_limpio = (int)$id;
+            $cantidad_limpia = (int)$cantidad;
+            if ($id_limpio <= 0 || $cantidad_limpia <= 0) {
+                continue;
+            }
+
+            $stmt_item->bind_param("i", $id_limpio);
+            $stmt_item->execute();
+            $res_item = $stmt_item->get_result();
+            $item = $res_item->fetch_assoc();
+
+            if ($item) {
+                $precio_real = (int)$item["precio"];
+                $subtotal = $precio_real * $cantidad_limpia;
+                $total_general = $total_general + $subtotal;
+
+                $item["cantidad_carrito"] = $cantidad_limpia;
+                $item["subtotal_carrito"] = $subtotal;
+                $productos_carrito[] = $item;
+            }
+        }
+        $stmt_item->close();
+    }
+}
+
+require_once 'includes/header_publico.php';
 ?>
 
 <section class="banner-catalogo">
@@ -63,7 +100,7 @@ require_once __DIR__ . '/includes/header_publico.php';
         </div>
     <?php endif; ?>
 
-    <?php if (empty($_SESSION["carrito"])): ?>
+    <?php if (empty($productos_carrito)): ?>
         <div class="mensaje-vacio">
             <h3>Tu carrito de pedidos está vacío</h3>
             <p>Todavía no agregaste productos a tu encargo. Explorá nuestro catálogo para armar tu pedido.</p>
@@ -83,31 +120,12 @@ require_once __DIR__ . '/includes/header_publico.php';
                 </div>
 
                 <div class="carrito-lista">
-                    <?php
-                    $total_general = 0.0;
-                    foreach ($_SESSION["carrito"] as $id => $cantidad):
-                        $id_limpio = (int)$id;
-                        $cantidad_limpia = (int)$cantidad;
-                        if ($cantidad_limpia <= 0) continue;
-
-                        $sql_item = "SELECT id_producto, nombre, precio, categoria, dias_habilitados FROM productos WHERE id_producto = ? AND (activo = 1 OR activo IS NULL)";
-                        $stmt_item = $conexion->prepare($sql_item);
-                        $stmt_item->bind_param("i", $id_limpio);
-                        $stmt_item->execute();
-                        $res_item = $stmt_item->get_result();
-                        $item = $res_item->fetch_assoc();
-                        $stmt_item->close();
-
-                        if ($item):
-                            $precio_real = (float)$item["precio"];
-                            $subtotal = $precio_real * $cantidad_limpia;
-                            $total_general += $subtotal;
-                    ?>
+                    <?php foreach ($productos_carrito as $item): ?>
                         <div class="carrito-fila-item">
                             <div class="carrito-item-info">
                                 <h3><?php echo htmlspecialchars($item["nombre"], ENT_QUOTES, 'UTF-8'); ?></h3>
                                 <p class="carrito-item-detalle">
-                                    Precio unitario: $<?php echo (int)$precio_real; ?> · Cantidad: <strong><?php echo $cantidad_limpia; ?></strong>
+                                    Precio unitario: $<?php echo (int)$item["precio"]; ?> · Cantidad: <strong><?php echo (int)$item["cantidad_carrito"]; ?></strong>
                                 </p>
                                 <small class="carrito-item-dias">
                                     Días de elaboración: <?php echo htmlspecialchars(str_replace(",", ", ", $item["dias_habilitados"]), ENT_QUOTES, 'UTF-8'); ?>
@@ -115,7 +133,7 @@ require_once __DIR__ . '/includes/header_publico.php';
                             </div>
 
                             <div class="carrito-item-derecha">
-                                <span class="carrito-item-subtotal">$<?php echo number_format($subtotal, 0, '', ''); ?></span>
+                                <span class="carrito-item-subtotal">$<?php echo (int)$item["subtotal_carrito"]; ?></span>
                                 <form action="acciones/carrito_quitar.php" method="POST">
                                     <input type="hidden" name="id_producto" value="<?php echo (int)$item["id_producto"]; ?>">
                                     <input type="hidden" name="accion" value="eliminar">
@@ -123,15 +141,12 @@ require_once __DIR__ . '/includes/header_publico.php';
                                 </form>
                             </div>
                         </div>
-                    <?php
-                        endif;
-                    endforeach;
-                    ?>
+                    <?php endforeach; ?>
                 </div>
 
                 <div class="carrito-total-barra">
                     <span>Total estimado a pagar al retirar:</span>
-                    <strong class="carrito-total-monto">$<?php echo number_format($total_general, 0, '', ''); ?></strong>
+                    <strong class="carrito-total-monto">$<?php echo (int)$total_general; ?></strong>
                 </div>
 
                 <div class="carrito-seguir-comprando">
@@ -147,7 +162,7 @@ require_once __DIR__ . '/includes/header_publico.php';
                 </p>
 
                 <!-- Contenedor para alertas de validación de JavaScript -->
-                <div id="errorValidacionPedidoJS" class="alerta alerta-error" style="display: none;"></div>
+                <div id="errorValidacionPedidoJS" class="alerta alerta-error oculto"></div>
 
                 <form action="acciones/pedido_guardar.php" method="POST" id="formPedidoCarrito" class="formulario-pedido">
                     <div class="grupo-formulario">
@@ -209,5 +224,5 @@ require_once __DIR__ . '/includes/header_publico.php';
 </section>
 
 <?php
-require_once __DIR__ . '/includes/footer.php';
+require_once 'includes/footer.php';
 ?>
