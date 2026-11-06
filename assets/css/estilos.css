@@ -70,6 +70,10 @@ a {
     padding: 0 20px;
 }
 
+.oculto {
+    display: none;
+}
+
 /* ==========================================================================
    2. BOTONES Y ALERTAS GENERALES
    ========================================================================== */
@@ -317,6 +321,14 @@ button:disabled {
     color: var(--color-blanco);
 }
 
+.user-role-badge.rol-admin {
+    background-color: var(--color-naranja);
+}
+
+.user-role-badge.rol-empleado {
+    background-color: #6D4C41;
+}
+
 .btn-logout-panel {
     background-color: var(--color-rojo);
     color: var(--color-blanco);
@@ -504,17 +516,26 @@ button:disabled {
     max-width: 700px;
 }
 
-/* HU01-T03: Barra de filtros */
-.barra-filtros {
+/* Base compartida para todas las barras de filtro del sistema */
+.barra-filtros,
+.barra-filtros-agenda,
+.barra-filtros-busqueda,
+.barra-filtros-calendario,
+.barra-filtros-estadisticas {
     background-color: var(--color-blanco);
     border: 1px solid var(--color-borde);
     border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 28px;
+    padding: 18px 20px;
     display: grid;
-    grid-template-columns: 2fr 1.5fr 1.5fr auto;
     gap: 16px;
     align-items: end;
+}
+
+/* HU01-T03: Barra de filtros del catálogo */
+.barra-filtros {
+    padding: 20px;
+    margin-bottom: 28px;
+    grid-template-columns: 2fr 1.5fr 1.5fr auto;
 }
 
 .filtro-item {
@@ -599,11 +620,16 @@ button:disabled {
 
 /* HU08-T03: Etiqueta roja "Agotado" */
 .etiqueta-agotado {
+    display: inline-block;
     background-color: var(--color-rojo);
     color: var(--color-blanco);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: bold;
 }
 
-/* Botón de corazón para Likes (Firebase) */
+/* Interfaz de Likes (Firebase): Botón de corazón (♡ / ♥) y contador */
 .btn-like {
     position: absolute;
     top: 10px;
@@ -618,12 +644,34 @@ button:disabled {
     cursor: pointer;
     font-size: 0.85rem;
     font-weight: 600;
+    transition: transform 0.15s ease, background-color 0.2s ease, border-color 0.2s ease;
+    box-shadow: 0 2px 6px rgba(44, 26, 17, 0.12);
+}
+
+.btn-like:hover {
+    transform: scale(1.06);
+    border-color: var(--color-rojo);
 }
 
 .btn-like.like-activo {
     background-color: var(--color-rojo-fondo);
     color: var(--color-rojo);
     border-color: var(--color-rojo);
+}
+
+.corazon-icono {
+    font-size: 1rem;
+    line-height: 1;
+    color: var(--color-rojo);
+}
+
+.btn-like.like-activo .corazon-icono {
+    color: var(--color-rojo);
+}
+
+.like-contador {
+    font-size: 0.82rem;
+    font-weight: 700;
 }
 
 .tarjeta-cuerpo {
@@ -762,17 +810,1170 @@ button:disabled {
 }
 
 /* ==========================================================================
-   9. DISEÑO RESPONSIVO (Celulares y Tablets - HU01-T05 y RNF-01)
+   9. CARRITO DE COMPRAS Y CONFIRMACIÓN DE PEDIDO (H.U-02 y H.U-03)
+   ========================================================================== */
+.seccion-carrito,
+.seccion-confirmacion {
+    padding: 20px 20px 40px;
+}
+
+.lista-errores {
+    margin-top: 8px;
+    padding-left: 20px;
+}
+
+.carrito-layout {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 28px;
+    align-items: start;
+}
+
+.carrito-productos-caja,
+.carrito-formulario-caja {
+    background-color: var(--color-blanco);
+    border: 1px solid var(--color-borde);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 12px rgba(44, 26, 17, 0.05);
+}
+
+.carrito-cabecera-caja {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--color-borde);
+}
+
+.carrito-cabecera-caja h2,
+.carrito-formulario-caja h2 {
+    font-family: Georgia, serif;
+    color: var(--color-oscuro);
+    font-size: 1.35rem;
+}
+
+.btn-pequeno {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+}
+
+.carrito-fila-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--color-borde);
+    gap: 15px;
+}
+
+.carrito-item-info h3 {
+    font-size: 1.05rem;
+    color: var(--color-oscuro);
+    margin-bottom: 4px;
+}
+
+.carrito-item-detalle {
+    font-size: 0.9rem;
+    color: var(--color-texto-suave);
+}
+
+.carrito-item-dias {
+    display: block;
+    margin-top: 4px;
+    color: var(--color-texto-suave);
+    font-size: 0.8rem;
+}
+
+.carrito-item-derecha {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.carrito-item-subtotal {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--color-oscuro);
+}
+
+.btn-quitar-item {
+    background-color: var(--color-rojo-fondo);
+    color: var(--color-rojo);
+    border: 1px solid #FCA5A5;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.carrito-total-barra {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--color-fondo-secundario);
+    padding: 16px;
+    border-radius: 8px;
+    margin-top: 18px;
+}
+
+.carrito-total-monto {
+    font-size: 1.35rem;
+    color: var(--color-naranja);
+}
+
+.carrito-seguir-comprando {
+    margin-top: 16px;
+}
+
+.carrito-form-ayuda {
+    font-size: 0.9rem;
+    color: var(--color-texto-suave);
+    margin: 8px 0 18px;
+}
+
+.formulario-pedido .grupo-formulario {
+    margin-bottom: 16px;
+}
+
+/* Estilos para confirmacion.php */
+.tarjeta-confirmacion {
+    background-color: var(--color-blanco);
+    border: 1px solid var(--color-borde);
+    border-radius: 12px;
+    padding: 32px;
+    max-width: 720px;
+    margin: 20px auto;
+    box-shadow: 0 4px 16px rgba(44, 26, 17, 0.06);
+}
+
+.confirmacion-encabezado {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.icono-exito-pedido {
+    width: 54px;
+    height: 54px;
+    background-color: var(--color-verde-fondo);
+    color: var(--color-verde);
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    font-weight: bold;
+    margin-bottom: 12px;
+}
+
+.confirmacion-encabezado h1 {
+    font-family: Georgia, serif;
+    color: var(--color-oscuro);
+    margin-bottom: 6px;
+}
+
+.confirmacion-encabezado p {
+    color: var(--color-texto-suave);
+}
+
+.confirmacion-datos-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    background-color: var(--color-fondo);
+    padding: 18px;
+    border-radius: 10px;
+    margin-bottom: 22px;
+}
+
+.dato-caja {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.dato-etiqueta {
+    font-size: 0.8rem;
+    color: var(--color-texto-suave);
+    text-transform: uppercase;
+}
+
+.dato-valor {
+    font-size: 1.05rem;
+    color: var(--color-oscuro);
+}
+
+.etiqueta-estado {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    width: fit-content;
+}
+
+.estado-pendiente {
+    background-color: var(--estado-pendiente-bg);
+    color: var(--estado-pendiente-txt);
+}
+
+.confirmacion-detalle-productos {
+    border-top: 1px solid var(--color-borde);
+    padding-top: 18px;
+    margin-bottom: 18px;
+}
+
+.confirmacion-detalle-productos h3 {
+    font-family: Georgia, serif;
+    margin-bottom: 12px;
+    color: var(--color-oscuro);
+}
+
+.lista-detalle-confirmacion {
+    list-style: none;
+    margin-bottom: 14px;
+}
+
+.lista-detalle-confirmacion li {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--color-borde);
+}
+
+.confirmacion-total-fila {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.15rem;
+    padding-top: 10px;
+    color: var(--color-oscuro);
+}
+
+.confirmacion-nota-bloqueo {
+    font-size: 0.85rem;
+    color: var(--color-texto-suave);
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.confirmacion-acciones {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* ==========================================================================
+   10. GESTIÓN DE PRODUCTOS EN PANEL INTERNO (H.U-09 / HU09-T01)
+   ========================================================================== */
+.contenedor-panel {
+    padding: 30px 20px 50px;
+}
+
+.cabecera-seccion-panel {
+    margin-bottom: 24px;
+}
+
+.cabecera-seccion-panel h2 {
+    font-family: Georgia, serif;
+    font-size: 1.8rem;
+    color: var(--color-oscuro);
+    margin-bottom: 4px;
+}
+
+.cabecera-seccion-panel p {
+    color: var(--color-texto-suave);
+    font-size: 0.95rem;
+}
+
+.seccion-formulario,
+.seccion-listado {
+    background-color: var(--color-blanco);
+    border: 1px solid var(--color-borde);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 28px;
+    box-shadow: 0 4px 12px rgba(44, 26, 17, 0.05);
+}
+
+.seccion-formulario h3,
+.seccion-listado h3 {
+    font-family: Georgia, serif;
+    font-size: 1.3rem;
+    color: var(--color-oscuro);
+    margin-bottom: 18px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--color-borde);
+}
+
+.fila-formulario-doble {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+.formulario-producto .grupo-formulario {
+    margin-bottom: 16px;
+}
+
+.fieldset-dias {
+    border: 1px solid var(--color-borde);
+    border-radius: 8px;
+    padding: 14px 16px;
+    background-color: var(--color-fondo);
+}
+
+.fieldset-dias legend {
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 0 8px;
+    color: var(--color-oscuro);
+}
+
+.checkboxes-dias {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.checkbox-dia {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: var(--color-blanco);
+    border: 1px solid var(--color-borde);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.checkbox-dia input {
+    width: auto;
+}
+
+.imagen-actual-preview {
+    margin-bottom: 10px;
+}
+
+.imagen-actual-preview img {
+    border-radius: 8px;
+    border: 1px solid var(--color-borde);
+}
+
+.acciones-formulario {
+    display: flex;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.tabla-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.tabla-productos {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.92rem;
+}
+
+.tabla-productos th,
+.tabla-productos td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--color-borde);
+    vertical-align: middle;
+}
+
+.tabla-productos th {
+    background-color: var(--color-fondo-secundario);
+    color: var(--color-oscuro);
+    font-weight: 700;
+}
+
+.miniatura-tabla {
+    width: 56px;
+    height: 44px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid var(--color-borde);
+}
+
+.sin-imagen-texto {
+    font-size: 0.8rem;
+    color: var(--color-texto-suave);
+}
+
+.sin-permisos-texto {
+    font-size: 0.85rem;
+    color: var(--color-texto-suave);
+}
+
+.celda-dias {
+    font-size: 0.85rem;
+    color: var(--color-texto-suave);
+    max-width: 240px;
+}
+
+.texto-vacio-panel {
+    color: var(--color-texto-suave);
+    padding: 15px 0;
+}
+
+/* ==========================================================================
+   11. CONTROL DE STOCK EN PANEL Y ETIQUETA "AGOTADO" (H.U-08 / HU08-T01 y HU08-T03)
+   ========================================================================== */
+/* HU08-T01: Checkbox de disponibilidad en el formulario de productos */
+.checkbox-disponible {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background-color: var(--color-fondo);
+    border: 1px solid var(--color-borde);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-weight: 600;
+    font-size: 0.92rem;
+    cursor: pointer;
+}
+
+.checkbox-disponible input {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+/* HU08-T01: Interruptor (switch) de stock en la tabla de productos (Disponible / Agotado) */
+.form-estado-stock {
+    display: inline-block;
+}
+
+.switch-stock {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.switch-stock input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: var(--color-verde);
+}
+
+.estado-disponible {
+    display: inline-block;
+    background-color: var(--color-verde-fondo);
+    color: var(--color-verde);
+    border: 1px solid #6EE7B7;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: bold;
+}
+
+/* ==========================================================================
+   12. AGENDA DE PEDIDOS DE COCINA Y FICHAS (H.U-04 / HU04-T01)
+   ========================================================================== */
+.barra-filtros-agenda {
+    margin-bottom: 18px;
+    grid-template-columns: 1.2fr 1.2fr 1.2fr auto;
+}
+
+.resumen-rango-agenda {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--color-fondo-secundario);
+    border: 1px solid var(--color-borde);
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    font-size: 0.92rem;
+}
+
+.agenda-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 22px;
+}
+
+.ficha-pedido {
+    background-color: var(--color-blanco);
+    border: 1px solid var(--color-borde);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 12px rgba(44, 26, 17, 0.05);
+}
+
+.ficha-pedido-cabecera {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 12px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid var(--color-borde);
+    gap: 10px;
+}
+
+.ficha-id-grupo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ficha-id {
+    font-family: Georgia, serif;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--color-oscuro);
+}
+
+.ficha-turno {
+    background-color: var(--color-naranja-claro);
+    color: var(--color-naranja);
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+/* Colores de etiquetas de estado en las fichas de pedidos */
+.estado-preparacion {
+    background-color: var(--estado-preparacion-bg);
+    color: var(--estado-preparacion-txt);
+}
+
+.estado-listo {
+    background-color: var(--estado-listo-bg);
+    color: var(--estado-listo-txt);
+}
+
+.estado-entregado {
+    background-color: var(--estado-entregado-bg);
+    color: var(--estado-entregado-txt);
+}
+
+.ficha-pedido-cliente {
+    background-color: var(--color-fondo);
+    padding: 12px 14px;
+    border-radius: 8px;
+    margin-bottom: 14px;
+    font-size: 0.92rem;
+}
+
+.ficha-pedido-cliente p {
+    margin-bottom: 4px;
+}
+
+.ficha-pedido-productos {
+    flex: 1;
+    margin-bottom: 14px;
+}
+
+.ficha-pedido-productos h4 {
+    font-size: 0.9rem;
+    color: var(--color-texto-suave);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.lista-productos-ficha {
+    list-style: none;
+}
+
+.lista-productos-ficha li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px dashed var(--color-borde);
+    font-size: 0.92rem;
+}
+
+.cantidad-ficha {
+    font-weight: bold;
+    color: var(--color-naranja);
+    margin-right: 8px;
+}
+
+.nombre-prod-ficha {
+    flex: 1;
+}
+
+.subtotal-prod-ficha {
+    font-weight: 600;
+    color: var(--color-oscuro);
+}
+
+.ficha-pedido-pie {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 12px;
+    border-top: 1px solid var(--color-borde);
+    font-size: 0.95rem;
+}
+
+.ficha-total-monto {
+    font-size: 1.15rem;
+    color: var(--color-oscuro);
+}
+
+/* ==========================================================================
+   12b. SELECTOR DE ESTADO Y COLORES EN TARJETAS (H.U-05 / HU05-T01 y HU05-T03)
+   ========================================================================== */
+/* Borde superior de cada tarjeta según el estado del pedido */
+.ficha-pedido.ficha-estado-pendiente {
+    border-top: 4px solid #F59E0B;
+}
+
+.ficha-pedido.ficha-estado-preparacion {
+    border-top: 4px solid #3B82F6;
+}
+
+.ficha-pedido.ficha-estado-listo {
+    border-top: 4px solid #10B981;
+}
+
+.ficha-pedido.ficha-estado-entregado {
+    border-top: 4px solid #9CA3AF;
+    opacity: 0.9;
+}
+
+/* Formulario selector de estado dentro de la ficha */
+.form-estado-pedido {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--color-borde);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.label-estado-pedido {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--color-texto-suave);
+    text-transform: uppercase;
+}
+
+.controles-estado-pedido {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.select-estado-pedido {
+    flex: 1;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--color-borde);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.select-estado-pedido.estado-pendiente {
+    background-color: var(--estado-pendiente-bg);
+    color: var(--estado-pendiente-txt);
+    border-color: #FCD34D;
+}
+
+.select-estado-pedido.estado-preparacion {
+    background-color: var(--estado-preparacion-bg);
+    color: var(--estado-preparacion-txt);
+    border-color: #93C5FD;
+}
+
+.select-estado-pedido.estado-listo {
+    background-color: var(--estado-listo-bg);
+    color: var(--estado-listo-txt);
+    border-color: #6EE7B7;
+}
+
+.select-estado-pedido.estado-entregado {
+    background-color: var(--estado-entregado-bg);
+    color: var(--estado-entregado-txt);
+    border-color: #D1D5DB;
+}
+
+/* ==========================================================================
+   12c. BÚSQUEDA Y FILTRADO DE PEDIDOS (H.U-07 / HU07-T01)
+   ========================================================================== */
+.barra-filtros-busqueda {
+    margin-bottom: 24px;
+    grid-template-columns: 1fr 1fr 1.4fr auto;
+}
+
+.cabecera-tabla-resultados {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--color-borde);
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.cabecera-tabla-resultados h3 {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.contador-resultados {
+    font-size: 0.9rem;
+    color: var(--color-texto-suave);
+}
+
+/* ==========================================================================
+   12d. CALENDARIO MENSUAL DE 7 COLUMNAS (H.U-06 / HU06-T01 y HU06-T03)
+   ========================================================================== */
+.barra-filtros-calendario {
+    margin-bottom: 18px;
+    grid-template-columns: 1.5fr 1fr auto;
+}
+
+.calendario-navegacion-mes {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--color-fondo-secundario);
+    border: 1px solid var(--color-borde);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.calendario-titulo-central {
+    text-align: center;
+}
+
+.calendario-titulo-central h3 {
+    font-family: Georgia, serif;
+    font-size: 1.4rem;
+    color: var(--color-oscuro);
+    margin-bottom: 2px;
+}
+
+.calendario-titulo-central span {
+    font-size: 0.88rem;
+    color: var(--color-texto-suave);
+}
+
+/* Contenedor con scroll horizontal suave en pantallas muy chicas */
+.calendario-contenedor {
+    background-color: var(--color-blanco);
+    border: 1px solid var(--color-borde);
+    border-radius: 12px;
+    overflow-x: auto;
+    box-shadow: 0 4px 12px rgba(44, 26, 17, 0.05);
+}
+
+/* HU06-T03: Encabezado de 7 columnas (Lunes a Domingo) */
+.calendario-cabecera-dias {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(125px, 1fr));
+    background-color: var(--color-oscuro);
+    color: var(--color-blanco);
+    border-bottom: 1px solid var(--color-borde);
+}
+
+.calendario-dia-nombre {
+    padding: 12px 10px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.88rem;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+/* HU06-T03: Cuadrícula tradicional de 7 columnas del mes */
+.calendario-grid-7col {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(125px, 1fr));
+}
+
+.calendario-celda {
+    min-height: 135px;
+    padding: 10px;
+    border-right: 1px solid var(--color-borde);
+    border-bottom: 1px solid var(--color-borde);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: var(--color-blanco);
+}
+
+.calendario-celda:nth-child(7n) {
+    border-right: none;
+}
+
+.calendario-celda-vacia {
+    background-color: #F4EFE6;
+}
+
+.calendario-celda-hoy {
+    background-color: #FFFDF9;
+    box-shadow: inset 0 0 0 2px var(--color-naranja);
+}
+
+.calendario-celda-con-pedidos {
+    background-color: #FFFAF3;
+}
+
+.calendario-celda-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.calendario-numero-dia {
+    font-family: Georgia, serif;
+    font-size: 1.05rem;
+    font-weight: bold;
+    color: var(--color-oscuro);
+}
+
+.calendario-badge-hoy {
+    background-color: var(--color-naranja);
+    color: var(--color-blanco);
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 999px;
+    text-transform: uppercase;
+}
+
+.calendario-resumen-dia {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex: 1;
+}
+
+.calendario-contador-dia {
+    display: inline-block;
+    background-color: var(--color-naranja-claro);
+    color: var(--color-naranja);
+    font-size: 0.76rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 6px;
+    width: fit-content;
+}
+
+.calendario-lista-mini {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 2px;
+}
+
+.calendario-item-mini {
+    font-size: 0.75rem;
+    padding: 3px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.calendario-mas-pedidos {
+    font-size: 0.74rem;
+    color: var(--color-texto-suave);
+    font-style: italic;
+}
+
+.calendario-link-agenda {
+    margin-top: auto;
+    padding-top: 4px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: var(--color-naranja);
+}
+
+.calendario-link-agenda:hover {
+    text-decoration: underline;
+}
+
+.calendario-sin-pedidos {
+    font-size: 0.78rem;
+    color: #B8ACA3;
+    margin-top: auto;
+}
+
+/* ==========================================================================
+   12e. ESTADÍSTICAS DE VENTAS Y TARJETAS DE MÉTRICAS (H.U-11 / HU11-T01)
+   ========================================================================== */
+.barra-filtros-estadisticas {
+    margin-bottom: 18px;
+    grid-template-columns: 1.5fr 1.2fr auto;
+}
+
+.metricas-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
+    margin-bottom: 28px;
+}
+
+.tarjeta-metrica {
+    background-color: var(--color-blanco);
+    border: 1px solid var(--color-borde);
+    border-radius: 12px;
+    padding: 22px 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 4px 12px rgba(44, 26, 17, 0.05);
+}
+
+.tarjeta-metrica.metrica-recaudacion {
+    border-top: 4px solid var(--color-verde);
+}
+
+.tarjeta-metrica.metrica-encargos {
+    border-top: 4px solid var(--color-naranja);
+}
+
+.tarjeta-metrica.metrica-estrella {
+    border-top: 4px solid #F59E0B;
+}
+
+.metrica-cabecera {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.metrica-titulo {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--color-texto-suave);
+    letter-spacing: 0.4px;
+}
+
+.metrica-icono {
+    font-size: 1.5rem;
+    background-color: var(--color-fondo);
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-borde);
+}
+
+.metrica-valor {
+    font-family: Georgia, serif;
+    font-size: 2.1rem;
+    font-weight: bold;
+    color: var(--color-oscuro);
+    margin-bottom: 8px;
+    line-height: 1.2;
+}
+
+.metrica-valor-producto {
+    font-size: 1.35rem;
+}
+
+.metrica-subtexto {
+    font-size: 0.86rem;
+    color: var(--color-texto-suave);
+}
+
+.badge-posicion {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    background-color: var(--color-fondo-secundario);
+    color: var(--color-oscuro);
+}
+
+.badge-posicion.posicion-oro {
+    background-color: #FEF3C7;
+    color: #92400E;
+    border: 1px solid #FCD34D;
+}
+
+/* ==========================================================================
+   12f. PORTADA DE INICIO Y DESTACADOS (H.U-10 / HU10-T01)
+   ========================================================================== */
+.hero-inicio {
+    background: linear-gradient(135deg, #2C1A11 0%, #4A2E1F 100%);
+    color: var(--color-blanco);
+    padding: 64px 0;
+    border-bottom: 4px solid var(--color-naranja);
+    margin-bottom: 42px;
+}
+
+.hero-contenido {
+    max-width: 760px;
+}
+
+.hero-etiqueta {
+    display: inline-block;
+    background-color: rgba(211, 84, 0, 0.28);
+    border: 1px solid #F5B041;
+    color: #FAD7A0;
+    padding: 5px 14px;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 14px;
+}
+
+.hero-contenido h1 {
+    font-family: Georgia, serif;
+    font-size: 2.5rem;
+    line-height: 1.2;
+    margin-bottom: 14px;
+    color: var(--color-blanco);
+}
+
+.hero-contenido p {
+    font-size: 1.08rem;
+    color: #E6DDD6;
+    margin-bottom: 24px;
+    max-width: 660px;
+}
+
+.hero-botones {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.hero-botones .btn-secundario {
+    background-color: var(--color-blanco);
+    color: var(--color-oscuro);
+    border-color: var(--color-blanco);
+}
+
+.seccion-destacados {
+    padding-bottom: 50px;
+}
+
+.destacados-encabezado {
+    margin-bottom: 28px;
+}
+
+.destacados-footer-cta {
+    margin-top: 36px;
+    background-color: var(--color-fondo-secundario);
+    border: 1px solid var(--color-borde);
+    border-radius: 12px;
+    padding: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.destacados-footer-cta p {
+    font-weight: 600;
+    color: var(--color-oscuro);
+    font-size: 1.02rem;
+}
+
+/* Checkbox y etiquetas de "Destacado" en el panel de productos (HU10-T01) */
+.fila-checkboxes-estado {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 10px;
+}
+
+.checkbox-destacado {
+    background-color: #FFFBEB;
+    border-color: #FCD34D;
+}
+
+.estado-destacado-activo {
+    display: inline-block;
+    background-color: #FEF3C7;
+    color: #92400E;
+    border: 1px solid #FCD34D;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: bold;
+}
+
+.estado-destacado-inactivo {
+    display: inline-block;
+    background-color: var(--color-fondo);
+    color: var(--color-texto-suave);
+    border: 1px solid var(--color-borde);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.acciones-fila-tabla {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.form-baja-producto {
+    display: inline-block;
+}
+
+/* ==========================================================================
+   13. DISEÑO RESPONSIVO (Celulares y Tablets - HU01-T05 y RNF-01)
    ========================================================================== */
 
-/* Tablets (hasta 992px): 2 columnas de productos y filtros en 2 columnas */
+/* Tablets (hasta 992px): 2 columnas de productos y carrito apilado */
 @media (max-width: 992px) {
     .catalogo-grid {
         grid-template-columns: repeat(2, 1fr);
     }
 
-    .barra-filtros {
+    .barra-filtros,
+    .barra-filtros-agenda,
+    .barra-filtros-busqueda,
+    .barra-filtros-calendario,
+    .barra-filtros-estadisticas {
         grid-template-columns: 1fr 1fr;
+    }
+
+    .metricas-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .agenda-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .carrito-layout {
+        grid-template-columns: 1fr;
     }
 
     .footer-grid {
@@ -807,8 +2008,18 @@ button:disabled {
         display: flex;
     }
 
-    .barra-filtros {
+    .barra-filtros,
+    .barra-filtros-agenda,
+    .barra-filtros-busqueda,
+    .barra-filtros-calendario,
+    .barra-filtros-estadisticas {
         grid-template-columns: 1fr;
+    }
+
+    .resumen-rango-agenda {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
     }
 
     .filtro-botones {
@@ -821,6 +2032,40 @@ button:disabled {
 
     .catalogo-grid {
         grid-template-columns: 1fr;
+    }
+
+    .carrito-fila-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .carrito-item-derecha {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .confirmacion-datos-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .confirmacion-acciones {
+        flex-direction: column;
+    }
+
+    .confirmacion-acciones .btn {
+        width: 100%;
+    }
+
+    .fila-formulario-doble {
+        grid-template-columns: 1fr;
+    }
+
+    .acciones-formulario {
+        flex-direction: column;
+    }
+
+    .acciones-formulario .btn {
+        width: 100%;
     }
 
     .footer-grid {

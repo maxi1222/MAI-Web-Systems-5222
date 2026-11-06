@@ -4,26 +4,29 @@
 
 $ruta_base = isset($ruta_base) ? $ruta_base : "";
 $telefono_mostrar = defined('TELEFONO_LOCAL') ? TELEFONO_LOCAL : "098 318 851";
+$es_vista_publica = !isset($pagina_panel);
 ?>
     </main>
 
-    <!-- Modal de aviso para modificar o cancelar pedido (H.U-03) -->
-    <div class="modal-overlay" id="modalCancelacion">
-        <div class="modal-card">
-            <button type="button" class="modal-close-btn" id="btnCerrarModalCancelacion">&times;</button>
-            <h3 class="modal-titulo">Modificar o Cancelar Pedido</h3>
-            <p class="modal-mensaje">
-                "Para cambiar o cancelar tu pedido, comunicate directamente al teléfono del local"
-            </p>
-            <div class="modal-datos">
-                <p><strong>Teléfono del local:</strong> <?php echo htmlspecialchars($telefono_mostrar, ENT_QUOTES, 'UTF-8'); ?></p>
-                <p><strong>Horario de atención:</strong> Lunes a Domingo de 07:00 a 20:30 hs</p>
-            </div>
-            <div class="modal-acciones">
-                <button type="button" class="btn btn-primario" id="btnEntendidoModal">Entendido</button>
+    <?php if ($es_vista_publica): ?>
+        <!-- Modal de aviso para modificar o cancelar pedido (H.U-03) -->
+        <div class="modal-overlay" id="modalCancelacion">
+            <div class="modal-card">
+                <button type="button" class="modal-close-btn" id="btnCerrarModalCancelacion">&times;</button>
+                <h3 class="modal-titulo">Modificar o Cancelar Pedido</h3>
+                <p class="modal-mensaje">
+                    "Para cambiar o cancelar tu pedido, comunicate directamente al teléfono del local"
+                </p>
+                <div class="modal-datos">
+                    <p><strong>Teléfono del local:</strong> <?php echo htmlspecialchars($telefono_mostrar, ENT_QUOTES, 'UTF-8'); ?></p>
+                    <p><strong>Horario de atención:</strong> Lunes a Domingo de 07:00 a 20:30 hs</p>
+                </div>
+                <div class="modal-acciones">
+                    <button type="button" class="btn btn-primario" id="btnEntendidoModal">Entendido</button>
+                </div>
             </div>
         </div>
-    </div>
+    <?php endif; ?>
 
     <footer class="footer-sitio">
         <div class="contenedor footer-grid">
@@ -60,5 +63,8 @@ $telefono_mostrar = defined('TELEFONO_LOCAL') ? TELEFONO_LOCAL : "098 318 851";
     </footer>
 
     <script src="<?php echo $ruta_base; ?>assets/js/main.js"></script>
+    <?php if ($es_vista_publica): ?>
+        <script src="<?php echo $ruta_base; ?>assets/js/firebase_likes.js"></script>
+    <?php endif; ?>
 </body>
 </html>

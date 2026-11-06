@@ -17,6 +17,7 @@ function es_administrador() {
 
 function requerir_administrador() {
     if (!es_administrador()) {
+        $_SESSION["mensaje_error"] = "Acceso restringido: Se requieren permisos de Administrador para acceder a esa sección.";
         $ruta_panel = file_exists("productos.php") ? "productos.php" : "../productos.php";
         header("Location: " . $ruta_panel . "?error=no_autorizado");
         exit();

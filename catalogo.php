@@ -1,8 +1,9 @@
 <?php
 // catalogo.php
-// Catálogo de productos con barra de filtros y diseño responsivo en tarjetas (H.U-01 y H.U-08)
+// Catálogo de productos con barra de filtros y consulta SQL preparada (H.U-01 y H.U-08)
 
 require_once 'config/conexion.php';
+require_once 'includes/funciones.php';
 
 $ruta_base = "";
 $pagina_actual = "catalogo";
@@ -13,94 +14,45 @@ $buscar = isset($_GET["buscar"]) ? trim($_GET["buscar"]) : "";
 $categoria = isset($_GET["categoria"]) ? trim($_GET["categoria"]) : "";
 $fecha_retiro = isset($_GET["fecha_retiro"]) ? trim($_GET["fecha_retiro"]) : "";
 
-// Lista de categorías del catálogo
-$categorias_disponibles = array(
-    "Panadería",
-    "Facturería",
-    "Tortas y Postres",
-    "Pastelería",
-    "Salados y Sandwichería"
-);
+// Lista oficial de categorías del catálogo
+$categorias_disponibles = obtener_categorias_catalogo();
 
-// Consultar productos de la base de datos (si ya hay productos cargados en MySQL)
+$buscar_like = "%" . $buscar . "%";
+$dia_con_tilde = !empty($fecha_retiro) ? obtener_dia_semana($fecha_retiro) : "";
+$dia_sin_tilde = !empty($dia_con_tilde) ? normalizar_texto_dias($dia_con_tilde) : "";
+$dia_like_sin = "%" . $dia_sin_tilde . "%";
+$dia_like_con = "%" . $dia_con_tilde . "%";
+
+// HU01-T02, HU01-T03 y HU01-T04: Consulta SQL preparada para listar productos activos aplicando filtros
+$sql = "SELECT id_producto, nombre, descripcion, precio, categoria, imagen_url, disponible, destacado, dias_habilitados
+        FROM productos
+        WHERE (activo = 1 OR activo IS NULL)
+          AND (? = '' OR categoria = ?)
+          AND (? = '' OR nombre LIKE ? OR descripcion LIKE ?)
+          AND (? = '' OR dias_habilitados LIKE ? OR dias_habilitados LIKE ?)
+        ORDER BY disponible DESC, nombre ASC";
+
 $productos = array();
-$sql = "SELECT id_producto, nombre, descripcion, precio, categoria, imagen_url, disponible, destacado, dias_habilitados FROM productos ORDER BY disponible DESC, nombre ASC";
-$resultado = $conexion->query($sql);
+$stmt = $conexion->prepare($sql);
 
-if ($resultado && $resultado->num_rows > 0) {
+if ($stmt) {
+    $stmt->bind_param(
+        "ssssssss",
+        $categoria,
+        $categoria,
+        $buscar,
+        $buscar_like,
+        $buscar_like,
+        $dia_sin_tilde,
+        $dia_like_sin,
+        $dia_like_con
+    );
+    $stmt->execute();
+    $resultado = $stmt->get_result();
     while ($fila = $resultado->fetch_assoc()) {
         $productos[] = $fila;
     }
-} else {
-    // Productos de muestra para visualizar las tarjetas mientras la tabla productos esté vacía
-    $productos = array(
-        array(
-            "id_producto" => 1,
-            "nombre" => "Croissant de Manteca Artesanal",
-            "descripcion" => "Hojaldre francés laminado a mano con manteca extra, horneado cada mañana.",
-            "precio" => 95,
-            "categoria" => "Facturería",
-            "imagen_url" => "assets/img/productos/default_panaderia.svg",
-            "disponible" => 1,
-            "destacado" => 1,
-            "dias_habilitados" => "Lunes,Martes,Miercoles,Jueves,Viernes,Sabado,Domingo"
-        ),
-        array(
-            "id_producto" => 2,
-            "nombre" => "Pan de Campo de Masa Madre",
-            "descripcion" => "Hogaza rústica de fermentación lenta, corteza crocante y miga suave.",
-            "precio" => 210,
-            "categoria" => "Panadería",
-            "imagen_url" => "assets/img/productos/default_panaderia.svg",
-            "disponible" => 1,
-            "destacado" => 1,
-            "dias_habilitados" => "Lunes,Martes,Miercoles,Jueves,Viernes,Sabado"
-        ),
-        array(
-            "id_producto" => 3,
-            "nombre" => "Tarta de Frutos Rojos y Crema",
-            "descripcion" => "Base de masa sablée rellena con crema pastelera y frutas frescas.",
-            "precio" => 680,
-            "categoria" => "Tortas y Postres",
-            "imagen_url" => "assets/img/productos/default_panaderia.svg",
-            "disponible" => 1,
-            "destacado" => 1,
-            "dias_habilitados" => "Jueves,Viernes,Sabado,Domingo"
-        ),
-        array(
-            "id_producto" => 4,
-            "nombre" => "Alfajores de Maicena Artesanales (6 u.)",
-            "descripcion" => "Media docena de alfajores suaves rellenos con dulce de leche y coco.",
-            "precio" => 240,
-            "categoria" => "Pastelería",
-            "imagen_url" => "assets/img/productos/default_panaderia.svg",
-            "disponible" => 0,
-            "destacado" => 0,
-            "dias_habilitados" => "Lunes,Martes,Miercoles,Jueves,Viernes,Sabado"
-        ),
-        array(
-            "id_producto" => 5,
-            "nombre" => "Docena de Bizcochos Surtidos",
-            "descripcion" => "Selección tradicional recién salida del horno: margaritas, vigilantes y quesitos.",
-            "precio" => 320,
-            "categoria" => "Facturería",
-            "imagen_url" => "assets/img/productos/default_panaderia.svg",
-            "disponible" => 1,
-            "destacado" => 0,
-            "dias_habilitados" => "Lunes,Martes,Miercoles,Jueves,Viernes,Sabado,Domingo"
-        ),
-        array(
-            "id_producto" => 6,
-            "nombre" => "Bandeja de Sándwiches de Miga (12 u.)",
-            "descripcion" => "Docena de sándwiches triples en pan de miga extra tierno de jamón y queso.",
-            "precio" => 590,
-            "categoria" => "Salados y Sandwichería",
-            "imagen_url" => "assets/img/productos/default_panaderia.svg",
-            "disponible" => 1,
-            "destacado" => 0,
-            "dias_habilitados" => "Martes,Miercoles,Jueves,Viernes,Sabado,Domingo"
-        )
-    );
+    $stmt->close();
 }
 
 // Fecha mínima para el selector (mañana / 24 horas de anticipación)
@@ -229,6 +181,9 @@ require_once 'includes/header_publico.php';
                                 <form action="acciones/carrito_agregar.php" method="POST" class="form-agregar-carrito">
                                     <input type="hidden" name="id_producto" value="<?php echo (int)$prod["id_producto"]; ?>">
                                     <input type="hidden" name="cantidad" value="1">
+                                    <?php if (!empty($fecha_retiro)): ?>
+                                        <input type="hidden" name="fecha_retiro" value="<?php echo htmlspecialchars($fecha_retiro, ENT_QUOTES, 'UTF-8'); ?>">
+                                    <?php endif; ?>
                                     <button type="submit" class="btn btn-primario btn-bloque">Encargar</button>
                                 </form>
                             <?php endif; ?>
