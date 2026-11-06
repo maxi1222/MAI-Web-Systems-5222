@@ -38,6 +38,17 @@ document.addEventListener("DOMContentLoaded", function () {
         return likes.includes(parseInt(idProducto, 10));
     }
 
+    // 3b. Quitar un ID de producto del registro local (cuando el visitante quita su like)
+    function quitarLikeVisitante(idProducto) {
+        try {
+            const idNum = parseInt(idProducto, 10);
+            const likes = obtenerLikesVisitante().filter(function (id) { return id !== idNum; });
+            localStorage.setItem(STORAGE_KEY_LIKES, JSON.stringify(likes));
+        } catch (e) {
+            console.warn("[Firebase Likes] No se pudo quitar el like en localStorage:", e);
+        }
+    }
+
     // 4. Leer todos los likes en una sola petición eficiente
     async function leerTodosLosLikesDeFirebase() {
         const endpoint = `${FIREBASE_DB_URL}/likes_productos.json`;
@@ -79,8 +90,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // 6. Actualizar e incrementar contador en el árbol JSON /likes_productos/prod_{id_producto}
-    async function incrementarLikeEnFirebase(idProducto, totalActual) {
+    // 6. Sumar (+1) o restar (-1) el contador en el árbol JSON /likes_productos/prod_{id_producto}
+    async function cambiarLikeEnFirebase(idProducto, totalActual, delta) {
         const idNum = parseInt(idProducto, 10);
         if (isNaN(idNum) || idNum <= 0) {
             console.error("[Firebase Likes] id_producto inválido:", idProducto);
@@ -103,7 +114,7 @@ document.addEventListener("DOMContentLoaded", function () {
             // Si falla la lectura previa, usamos totalActual
         }
 
-        const nuevoTotal = conteoBase + 1;
+        const nuevoTotal = Math.max(0, conteoBase + delta);
         const ahoraIso = new Date().toISOString();
 
         try {
@@ -146,7 +157,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (activo) {
                 btn.classList.add("like-activo");
                 if (corazonSpan) corazonSpan.textContent = "♥";
-                btn.title = "Ya te gusta este producto";
+                btn.title = "Quitar me gusta";
             } else {
                 btn.classList.remove("like-activo");
                 if (corazonSpan) corazonSpan.textContent = "♡";
@@ -205,27 +216,34 @@ document.addEventListener("DOMContentLoaded", function () {
         boton.addEventListener("click", async function (e) {
             e.preventDefault();
 
-            // Evitar votos duplicados por visitante
-            if (haDadoLike(idProducto)) {
-                actualizarVisualizacionBoton(idProducto, undefined, true);
-                return;
-            }
-
-            // Deshabilitar momentáneamente para evitar doble click
-            boton.disabled = true;
+            // Evitar doble click mientras se procesa (sin usar "disabled" para no alterar el estilo)
+            if (boton.dataset.procesando === "1") return;
+            boton.dataset.procesando = "1";
 
             const contadorSpan = boton.querySelector(".like-contador");
             const totalActual = contadorSpan ? (parseInt(contadorSpan.textContent, 10) || 0) : 0;
 
-            const nuevoTotal = await incrementarLikeEnFirebase(idProducto, totalActual);
+            // Si ya dio like, se lo quita (-1); si no, lo agrega (+1)
+            const yaVoto = haDadoLike(idProducto);
+            const delta = yaVoto ? -1 : 1;
 
-            // Registrar al visitante en localStorage
-            registrarLikeVisitante(idProducto);
+            // Actualización visual inmediata (optimista)
+            actualizarVisualizacionBoton(idProducto, Math.max(0, totalActual + delta), !yaVoto);
 
-            // Actualizar visualmente todos los elementos de este producto
-            actualizarVisualizacionBoton(idProducto, nuevoTotal, true);
+            const nuevoTotal = await cambiarLikeEnFirebase(idProducto, totalActual, delta);
 
-            boton.disabled = false;
+            // Registrar o quitar al visitante en localStorage
+            if (yaVoto) {
+                quitarLikeVisitante(idProducto);
+            } else {
+                registrarLikeVisitante(idProducto);
+            }
+
+            // Actualizar visualmente todos los elementos de este producto con el total real
+            actualizarVisualizacionBoton(idProducto, nuevoTotal, !yaVoto);
+
+            boton.dataset.procesando = "0";
         });
     });
 });
+

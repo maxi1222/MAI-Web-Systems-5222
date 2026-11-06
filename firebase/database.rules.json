@@ -11,7 +11,7 @@
           ".validate": "newData.isNumber() && newData.val() > 0"
         },
         "total": {
-          ".validate": "newData.isNumber() && newData.val() >= 0 && (!data.exists() ? newData.val() === 1 : newData.val() === data.val() + 1)"
+          ".validate": "newData.isNumber() && newData.val() >= 0 && (!data.exists() ? newData.val() === 1 : (newData.val() === data.val() + 1 || newData.val() === data.val() - 1))"
         }
       }
     }
