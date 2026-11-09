@@ -131,6 +131,9 @@ firebase deploy --only database
 
 ## Estructura del proyecto
 
+La siguiente estructura muestra las principales carpetas y archivos del repositorio. Se incluyen por separado las acciones del sitio público y las acciones del panel interno.
+
+```text
 MAI-Web-Systems-5222/
 ├── Base_de_datos/
 │   └── MAI_Panaderia.sql
@@ -143,10 +146,14 @@ MAI-Web-Systems-5222/
 │   │   └── estilos.css
 │   ├── img/
 │   │   └── productos/
-│   │       └── default_panaderia.svg
+│   │       ├── default_panaderia.svg
+│   │       ├── imagenes.txt
+│   │       └── 1793195543_IMG_20251210_142718.jpg
 │   └── js/
 │       ├── main.js
 │       └── firebase_likes.js
+├── Documentacion/
+│   └──Documentacion Proyecto 3ro MD (Iñaki Barreda, Maximiliano Castellanos, Alejandro García Feijó).pdf
 ├── config/
 │   └── conexion.php
 ├── firebase/
@@ -163,7 +170,6 @@ MAI-Web-Systems-5222/
 ├── panel/
 │   ├── acciones/                     # Procesos del panel interno
 │   │   ├── pedido_estado.php         # Actualiza el estado de un pedido
-│   │   ├── producto_baja.php         # Realiza la baja lógica del producto
 │   │   ├── producto_estado.php       # Cambia disponibilidad o destacado
 │   │   └── producto_guardar.php      # Registra o actualiza productos
 │   ├── agenda.php
@@ -178,7 +184,14 @@ MAI-Web-Systems-5222/
 ├── catalogo.php
 ├── confirmacion.php
 ├── index.php
-└── Readme.md
+└── README.md
+```
+
+### Acciones del panel interno (`panel/acciones/`)
+
+- **`pedido_estado.php`:** recibe la solicitud para cambiar el estado de un pedido, valida que el nuevo estado sea permitido y actualiza el registro en MySQL.
+- **`producto_guardar.php`:** valida y registra un producto nuevo o guarda los cambios de un producto existente, incluyendo sus datos, imagen, disponibilidad, si está destacado y los días de elaboración.
+- **`producto_estado.php`:** permite modificar la disponibilidad de un producto (disponible o agotado) y su condición de destacado, aplicando la restricción de que solo el administrador pueda modificar esta última.
 
 ## Alcance y consideraciones
 
@@ -186,6 +199,10 @@ MAI-Web-Systems-5222/
 - El sistema no incluye procesamiento de pagos con tarjeta en línea ni gestión de envíos a domicilio.
 - La modificación o cancelación de un pedido confirmado se deriva a la atención telefónica del local; no se realiza directamente desde la web.
 - Los valores de conexión, el cupo diario y el teléfono del local se pueden ajustar en `config/conexion.php`.
+
+## Mockup
+
+https://www.figma.com/design/V0RoXnnm6N1wQwlreignUO/mokup?node-id=0-1&t=Lie1uCFY7FUIOsEL-1
 
 ## Equipo de desarrollo
 
